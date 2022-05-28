@@ -4,15 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Animations.Rigging;
 
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] private HealthSystem _health;
+    [SerializeField] private StaminaSystem _stamina;
+    [SerializeField] private PlayerUI _playerUI;
+    [Space]
     [SerializeField] private Animator _playerAnimator;
     [SerializeField] private Rigidbody _body;
     [Space]
     [SerializeField] private float _rotationSpeed;
     [SerializeField] private float _dashForce;
+    [SerializeField] private float _staminaPerDash;
     [SerializeField] private float _dashCooldown;
     [Space]
     [SerializeField] private List<PlayerSpeed> _playerSpeeds = new List<PlayerSpeed>();
@@ -38,17 +42,13 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        _input.Player.Move.performed += GetMoveVector;
-        _input.Player.Run.performed += HandleRun;
-       // _input.Player.Run.canceled += HandleRun; // for gamepad
-        _input.Player.Sprint.performed += EnableSprint;
-        _input.Player.Sprint.canceled += _ => DisableSprint();
-        _input.Player.Dash.performed += _ => Dash();
+        _playerUI.InitPlayerValues(_health, _stamina);
+        SetInputs();
     }
+   
 
     private void Start()
     {
-        Cursor.visible = false;
         ChangeCurrentSpeedType(PlayerSpeed.SpeedType.Walk);
     }
 
@@ -72,7 +72,6 @@ public class PlayerController : MonoBehaviour
     {
         _currentSpeed = _playerSpeeds.Where(s => s.Type == type).FirstOrDefault();
     }
-
 
     private void RotateTowards()
     {
@@ -106,7 +105,7 @@ public class PlayerController : MonoBehaviour
 
     private void EnableSprint(InputAction.CallbackContext obj)
     {
-        if(!_isSprint)
+        if(!_isSprint && _stamina.CurrentValue > 0)
         {
             _isSprint = true;
             ChangeCurrentSpeedType(PlayerSpeed.SpeedType.Sprint);
@@ -137,7 +136,7 @@ public class PlayerController : MonoBehaviour
 
     private void Dash()
     {
-        if(_moveDir != Vector3.zero && !_isDashing)
+        if(_moveDir != Vector3.zero && !_isDashing && _stamina.CurrentValue > 0)
             StartCoroutine(Dashing(_dashCooldown, _moveDir));
     }
 
@@ -149,6 +148,7 @@ public class PlayerController : MonoBehaviour
         _playerAnimator.speed = speed;
         _isDashing = true;
         _body.AddRelativeForce(dir.normalized * _dashForce, ForceMode.Impulse);
+        _stamina.CurrentValue -= _staminaPerDash;
         yield return new WaitForSeconds(dashCooldown);
         _isDashing = false;
     }
@@ -163,7 +163,10 @@ public class PlayerController : MonoBehaviour
         _playerAnimator.SetFloat("InputX", velocityX, 0.1f, Time.deltaTime);
         _body.AddRelativeForce(_moveDir.normalized * _currentSpeed.Acceleration * Time.deltaTime);
 
-        if (_isSprint && _moveDir.z < 0 || _moveDir.x != 0)
+        if (_isSprint)
+            _stamina.CurrentValue -= Time.deltaTime * 20;
+
+        if (_isSprint && _moveDir.z < 0 || _moveDir.x != 0 || _stamina.CurrentValue <= 0)
             DisableSprint();
     }
 
@@ -171,6 +174,16 @@ public class PlayerController : MonoBehaviour
     {
         var input = value.ReadValue<Vector2>();
         _moveDir = new Vector3(input.x, 0, input.y);
+    }
+
+    private void SetInputs()
+    {
+        _input.Player.Move.performed += GetMoveVector;
+        _input.Player.Run.performed += HandleRun;
+        // _input.Player.Run.canceled += HandleRun; // for gamepad
+        _input.Player.Sprint.performed += EnableSprint;
+        _input.Player.Sprint.canceled += _ => DisableSprint();
+        _input.Player.Dash.performed += _ => Dash();
     }
 }
 

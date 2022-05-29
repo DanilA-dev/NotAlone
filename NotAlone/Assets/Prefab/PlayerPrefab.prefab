@@ -933,13 +933,13 @@ MonoBehaviour:
   _playerSpeeds:
   - <Type>k__BackingField: 0
     <Acceleration>k__BackingField: 1000
-    <Decceleration>k__BackingField: 500
+    <StaminaPerSec>k__BackingField: 0
   - <Type>k__BackingField: 1
     <Acceleration>k__BackingField: 2000
-    <Decceleration>k__BackingField: 500
+    <StaminaPerSec>k__BackingField: 0
   - <Type>k__BackingField: 2
     <Acceleration>k__BackingField: 3000
-    <Decceleration>k__BackingField: 500
+    <StaminaPerSec>k__BackingField: 10
 --- !u!114 &4754732741161431161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -971,7 +971,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _topValue: 100
   _autoRegen: 1
-  _regenAfterTime: 3
+  _regenAfterTime: 2
   _regenTime: 5
   _regenAmount: 100
 --- !u!1 &4754732741174600120
@@ -1687,7 +1687,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4754732741492474093}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3236,7 +3236,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 298, y: -36.99994}
+  m_AnchoredPosition: {x: 298, y: -37}
   m_SizeDelta: {x: 571.7144, y: 29.0336}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4754732742440901280

@@ -129,13 +129,15 @@ public class PlayerController : MonoBehaviour
     {
         if (_body.velocity.magnitude > 0)
         {
-            var oppositeDir = -_body.velocity * _currentSpeed.Decceleration;
+            var oppositeDir = -_body.velocity * _currentSpeed.Friction;
             _body.AddForce(oppositeDir * Time.deltaTime);
         }
     }
 
     private void Dash()
     {
+        _stamina.RestRegenTimer();
+
         if(_moveDir != Vector3.zero && !_isDashing && _stamina.CurrentValue > 0)
             StartCoroutine(Dashing(_dashCooldown, _moveDir));
     }
@@ -163,8 +165,11 @@ public class PlayerController : MonoBehaviour
         _playerAnimator.SetFloat("InputX", velocityX, 0.1f, Time.deltaTime);
         _body.AddRelativeForce(_moveDir.normalized * _currentSpeed.Acceleration * Time.deltaTime);
 
+        if(_moveDir != Vector3.zero)
+            _currentSpeed.ReduceStamina(_stamina);
+
         if (_isSprint)
-            _stamina.CurrentValue -= Time.deltaTime * 20;
+            _stamina.RestRegenTimer();
 
         if (_isSprint && _moveDir.z < 0 || _moveDir.x != 0 || _stamina.CurrentValue <= 0)
             DisableSprint();
@@ -199,5 +204,12 @@ public class PlayerSpeed
 
     [field: SerializeField] public SpeedType Type { get; private set; }
     [field : SerializeField, Range(0,10000)] public float Acceleration { get; private set; }
-    [field: SerializeField, Range(0, 10000)] public float Decceleration { get; private set; }
+    [field: SerializeField, Range(0, 100)] public float StaminaPerSec { get; private set; }
+    public float Friction { get; private set; } = 500;
+
+    public void ReduceStamina(StaminaSystem stamina)
+    {
+        stamina.CurrentValue -= StaminaPerSec * Time.deltaTime;
+    }
+
 }

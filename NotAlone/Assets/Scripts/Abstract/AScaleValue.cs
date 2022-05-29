@@ -11,7 +11,7 @@ public abstract class AScaleValue : MonoBehaviour
     [ShowIf("_autoRegen")]
     [SerializeField, Range(0, 10)] protected float _regenAfterTime;
     [ShowIf("_autoRegen")]
-    [SerializeField, Range(0, 10)] protected float _regenTime;
+    [SerializeField, Range(0, 100)] protected float _regenTime;
     [ShowIf("_autoRegen")]
     [SerializeField] protected float _regenAmount;
 
@@ -35,44 +35,27 @@ public abstract class AScaleValue : MonoBehaviour
     private void Awake()
     {
         _currentValue = _topValue;
-
-        if (_autoRegen)
-            OnValueChanged += AutoRegen;
     }
 
-    private void OnDestroy()
+    public void RestRegenTimer()
     {
-        OnValueChanged -= AutoRegen;
+        _currentRegenTime = _regenAfterTime;
     }
 
-    private void AutoRegen(float value, float maxValue) // subscribe to Sprint input and DashInput to reset regenTimer
+    private void Update()
     {
-        if(!_isRegenerating)
-            StartCoroutine(LastValueChangeTimer());
-    }
+        if (!_autoRegen)
+            return;
 
-    private IEnumerator LastValueChangeTimer()
-    {
-        while(_currentRegenTime > 0)
-        {
+        if (_currentRegenTime <= 0)
+            RegenValue();
+        else
             _currentRegenTime -= Time.deltaTime;
-            yield return null;
-        }
-        StartCoroutine(RegenValue(_regenAfterTime, _regenTime, _regenAmount));
     }
 
-    protected IEnumerator RegenValue(float regetAfterTime,float time, float regenTime)
+    private void RegenValue()
     {
-        _isRegenerating = true;
-        yield return new WaitForSeconds(regetAfterTime);
-        for (float i = 0; i < time; i+= Time.deltaTime)
-        {
-            CurrentValue++;
-            if(CurrentValue >= regenTime)
-                break;
-
-            yield return new WaitForEndOfFrame();
-        }
-        _isRegenerating = false;
+        if(_currentRegenTime <= 0 && CurrentValue < _regenAmount)
+            CurrentValue += Time.deltaTime * _regenTime;
     }
 }

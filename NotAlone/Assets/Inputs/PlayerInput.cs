@@ -197,7 +197,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""c32de281-b98a-4463-b7d2-cb64722418f4"",
                     ""path"": ""<Keyboard>/shift"",
-                    ""interactions"": ""Hold(pressPoint=0.8)"",
+                    ""interactions"": ""Hold(duration=0.4,pressPoint=0.2)"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Sprint"",

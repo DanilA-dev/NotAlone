@@ -8,15 +8,13 @@ public class Flashlight : Item
 
     public override void Equip()
     {
-        base.Equip();
-        _rigIK.weight = 1;
         this.gameObject.SetActive(true);
+        _rigIK.weight = 1;
     }
 
     public override void UnEquip()
     {
-        base.UnEquip();
-        _rigIK.weight = 0;
         this.gameObject.SetActive(false);
+        _rigIK.weight = 0;
     }
 }

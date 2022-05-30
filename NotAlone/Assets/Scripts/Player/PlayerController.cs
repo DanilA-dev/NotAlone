@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using DG.Tweening;
 using System.Threading.Tasks;
 
 public class PlayerController : MonoBehaviour, IInteractor
 {
+    [Header("Systems")]
     [SerializeField] private HealthSystem _health;
     [SerializeField] private StaminaSystem _stamina;
     [SerializeField] private PlayerUI _playerUI;
@@ -27,7 +27,6 @@ public class PlayerController : MonoBehaviour, IInteractor
     private PlayerInput _input;
     private Camera _cam;
 
-    private bool _focusInteractable;
     private bool _isDashing;
     private bool _isSprint;
     private bool _isRun;
@@ -35,30 +34,29 @@ public class PlayerController : MonoBehaviour, IInteractor
     private Vector3 _moveDir;
     private Vector3 _dirToMouse;
 
-    public bool IsFocusingInteractable { get => _focusInteractable; set => _focusInteractable = value; }
+    #region Properties
+
+    public GameObject GameObject => this.gameObject;
+
+    #endregion
 
     private void Awake()
     {
         _cam = Camera.main;
         _input = new PlayerInput();
-        _input.Enable();
+        ToogleInput(true);
     }
 
     private void OnEnable()
     {
         _playerUI.InitPlayerValues(_health, _stamina);
-        SetInputs();
-    }
-   
-
-    private void Start()
-    {
         ChangeCurrentSpeedType(MovementType.SpeedType.Walk);
+        SetInputs();
     }
 
     private void OnDisable()
     {
-        _input.Disable();
+        ToogleInput(false);
     }
 
     private void Update()
@@ -68,7 +66,7 @@ public class PlayerController : MonoBehaviour, IInteractor
 
     private void FixedUpdate()
     {
-        Move(_moveDir);
+        Move(_moveDir, false);
         Friciton();
     }
 
@@ -79,9 +77,6 @@ public class PlayerController : MonoBehaviour, IInteractor
 
     private void RotateTowardsMouse()
     {
-        if (_focusInteractable)
-            return;
-
         Vector3 lookDelta = _input.Player.LookDelta.ReadValue<Vector2>();
         Ray ray = _cam.ScreenPointToRay(_input.Player.Look.ReadValue<Vector2>());
         if(lookDelta != Vector3.zero)
@@ -91,11 +86,15 @@ public class PlayerController : MonoBehaviour, IInteractor
                 _dirToMouse = hit.point - transform.position;
                 _dirToMouse.y = 0;
                 _dirToMouse.Normalize();
-                Quaternion r = Quaternion.LookRotation(_dirToMouse, Vector3.up);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, r, _rotationSpeed * Time.deltaTime);
+                RotateTowards(_dirToMouse);
             }
         }
-       
+    }
+
+    private void RotateTowards(Vector3 dir)
+    {
+        Quaternion r = Quaternion.LookRotation(dir, Vector3.up);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, r, _rotationSpeed * Time.deltaTime);
     }
 
     private void HandleRun(InputAction.CallbackContext obj)
@@ -162,7 +161,7 @@ public class PlayerController : MonoBehaviour, IInteractor
         _isDashing = false;
     }
 
-    private void Move(Vector3 moveDir)
+    private void Move(Vector3 moveDir, bool useGlobalCoordinates)
     {
         Vector3 target = _body.transform.InverseTransformDirection(_body.velocity);
         float velocityZ = target.z;
@@ -170,9 +169,13 @@ public class PlayerController : MonoBehaviour, IInteractor
 
         _playerAnimator.SetFloat("InputY", velocityZ, 0.1f, Time.deltaTime);
         _playerAnimator.SetFloat("InputX", velocityX, 0.1f, Time.deltaTime);
-        _body.AddRelativeForce(moveDir.normalized * _currentMovement.Acceleration * Time.deltaTime);
 
-        if(_moveDir != Vector3.zero)
+        if(useGlobalCoordinates)
+            _body.AddForce(moveDir.normalized * _currentMovement.Acceleration * Time.deltaTime);
+        else
+            _body.AddRelativeForce(moveDir.normalized * _currentMovement.Acceleration * Time.deltaTime);
+
+        if (_moveDir != Vector3.zero)
             _currentMovement.ReduceStamina(_stamina);
 
         if (_isSprint)
@@ -185,18 +188,13 @@ public class PlayerController : MonoBehaviour, IInteractor
     private void GetMoveVector(InputAction.CallbackContext value)
     {
         var input = value.ReadValue<Vector2>();
-        if (!_focusInteractable)
-            _moveDir = new Vector3(input.x, 0, input.y);
-        else
-            _moveDir = Vector3.zero;
-
+        _moveDir = new Vector3(input.x, 0, input.y);
     }
 
     private void SetInputs()
     {
         _input.Player.Move.performed += GetMoveVector;
         _input.Player.Run.performed += HandleRun;
-        // _input.Player.Run.canceled += HandleRun; // for gamepad
         _input.Player.Sprint.performed += EnableSprint;
         _input.Player.Sprint.canceled += _ => DisableSprint();
         _input.Player.Dash.performed += _ => Dash();
@@ -218,25 +216,34 @@ public class PlayerController : MonoBehaviour, IInteractor
     public async void FocusToInteractable(Transform objectToFocus)
     {
         var pickAbleItem = objectToFocus.GetComponent<PickableItem>();
-
         if(pickAbleItem)
         {
-            Vector3 dirToItem = (pickAbleItem.transform.localPosition - transform.position).normalized;
-            transform.DORotate(dirToItem, 1).OnComplete(async () =>
+            ToogleInput(false);
+            Vector3 dirToItem = (objectToFocus.position - transform.position).normalized;
+            while (Vector3.Distance(transform.position, pickAbleItem.transform.position) > pickAbleItem.PickUpDistance)
             {
-                while(Vector3.Distance(transform.position, pickAbleItem.transform.position) > pickAbleItem.PickUpDistance)
-                {
-                    Move(dirToItem.normalized);
-                    await Task.Yield();
-                }
-                _playerAnimator.SetTrigger("Take");
-                pickAbleItem.DestroyItemOnScene(1);
-            });
+                Vector3 rotateDir = new Vector3(dirToItem.x, transform.position.y, dirToItem.z);
+                RotateTowards(rotateDir);
+                Move(dirToItem, true);
+                await Task.Yield();
+            }
+            _playerAnimator.SetTrigger("Take");
+            pickAbleItem.DisableItemOnScene();
         }
     }
 
+    private bool ToogleInput(bool value)
+    {
+        bool i = value;
 
-    public void ResetInteractableFocus() => _focusInteractable = !_focusInteractable;
+        if (i == true)
+            _input.Enable();
+        else
+            _input.Disable();
 
+        return i;
+    }    
+
+    public void ResetInteractableFocus() => ToogleInput(true);
 }
 

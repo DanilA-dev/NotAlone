@@ -3,8 +3,7 @@ using UnityEngine;
 
 public interface IInteractor
 {
-    bool IsFocusingInteractable { get; set; }
-
+    GameObject GameObject { get; }
     void FocusToInteractable(Transform objectToFocus);
 }
 

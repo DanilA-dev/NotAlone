@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [Serializable]
@@ -20,5 +22,4 @@ public class MovementType
     {
         stamina.CurrentValue -= StaminaPerSec * Time.deltaTime;
     }
-
 }

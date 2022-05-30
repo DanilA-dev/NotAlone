@@ -1,10 +1,13 @@
 using TMPro;
 using UnityEngine;
 using DG.Tweening;
+using System;
+using System.Threading.Tasks;
 
 [RequireComponent(typeof(SphereCollider))]
 public class PickableItem : MonoBehaviour, IInteractable
 {
+    [SerializeField] private Item _itemToEquipment;
     [SerializeField] private float _pickUpDistance;
     [SerializeField] private TMP_Text _pickUpText;
 
@@ -20,13 +23,21 @@ public class PickableItem : MonoBehaviour, IInteractable
     public void Interact(IInteractor interactor)
     {
         _interactor = interactor;
-        _interactor.IsFocusingInteractable = true;
         _interactor.FocusToInteractable(this.transform);
+        AddItemToEquipment(interactor);
     }
 
-    public void DestroyItemOnScene(float time)
+    private void AddItemToEquipment(IInteractor interactor)
     {
-        Destroy(gameObject, time);
+        var equipmentSystem = interactor.GameObject.GetComponentInChildren<EquipmentSystem>();
+        if (equipmentSystem)
+            equipmentSystem.AddItem(_itemToEquipment, true);
+    }
+
+    public async void DisableItemOnScene()
+    {
+        await Task.Delay(1000);
+        this.gameObject.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -34,8 +45,14 @@ public class PickableItem : MonoBehaviour, IInteractable
         if (other.TryGetComponent(out IInteractor interactor))
         {
             _pickUpText.gameObject.SetActive(true);
-            _pickUpText.DOFade(1, 1);
+            _pickUpText.DOFade(1, 1).From(0);
         }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.TryGetComponent(out IInteractor interactor))
+            _pickUpText.gameObject.SetActive(true);
     }
 
     private void OnTriggerExit(Collider other)

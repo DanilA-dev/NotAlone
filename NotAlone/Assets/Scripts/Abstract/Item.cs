@@ -1,18 +1,19 @@
 using UnityEngine;
 
-public enum ItemState
+public enum ItemType
 {
-    UnEquiped,
-    Equiped
+   Equipable,
+   Collectable
 }
 
 public class Item : MonoBehaviour
 {
+    [field : SerializeField] public ItemType ItemType { get; private set; }
+    [field: SerializeField] public int ID { get; private set; }
 
-    [field : SerializeField] public ItemState ItemState { get; private set; }
 
-    public virtual void Equip() => ItemState = ItemState.Equiped;
+    public virtual void Equip() { }
 
-    public virtual void UnEquip() => ItemState = ItemState.UnEquiped;
+    public virtual void UnEquip() { }
 
 }

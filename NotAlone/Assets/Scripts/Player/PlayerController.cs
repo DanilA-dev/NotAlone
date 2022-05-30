@@ -1,11 +1,12 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using DG.Tweening;
+using System.Threading.Tasks;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IInteractor
 {
     [SerializeField] private HealthSystem _health;
     [SerializeField] private StaminaSystem _stamina;
@@ -19,19 +20,22 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _staminaPerDash;
     [SerializeField] private float _dashCooldown;
     [Space]
-    [SerializeField] private List<PlayerSpeed> _playerSpeeds = new List<PlayerSpeed>();
+    [SerializeField] private List<MovementType> _playerMovements = new List<MovementType>();
 
-    private PlayerSpeed _currentSpeed;
+    private IInteractable _lastInteractableObject;
+    private MovementType _currentMovement;
     private PlayerInput _input;
     private Camera _cam;
 
+    private bool _focusInteractable;
     private bool _isDashing;
     private bool _isSprint;
     private bool _isRun;
 
     private Vector3 _moveDir;
     private Vector3 _dirToMouse;
-    
+
+    public bool IsFocusingInteractable { get => _focusInteractable; set => _focusInteractable = value; }
 
     private void Awake()
     {
@@ -49,7 +53,7 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        ChangeCurrentSpeedType(PlayerSpeed.SpeedType.Walk);
+        ChangeCurrentSpeedType(MovementType.SpeedType.Walk);
     }
 
     private void OnDisable()
@@ -59,22 +63,25 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        RotateTowards();
+        RotateTowardsMouse();
     }
 
     private void FixedUpdate()
     {
-        Move();
+        Move(_moveDir);
         Friciton();
     }
 
-    private void ChangeCurrentSpeedType(PlayerSpeed.SpeedType type)
+    private void ChangeCurrentSpeedType(MovementType.SpeedType type)
     {
-        _currentSpeed = _playerSpeeds.Where(s => s.Type == type).FirstOrDefault();
+        _currentMovement = _playerMovements.Where(s => s.Type == type).FirstOrDefault();
     }
 
-    private void RotateTowards()
+    private void RotateTowardsMouse()
     {
+        if (_focusInteractable)
+            return;
+
         Vector3 lookDelta = _input.Player.LookDelta.ReadValue<Vector2>();
         Ray ray = _cam.ScreenPointToRay(_input.Player.Look.ReadValue<Vector2>());
         if(lookDelta != Vector3.zero)
@@ -97,9 +104,9 @@ public class PlayerController : MonoBehaviour
         _playerAnimator.SetBool("Run", _isRun);
 
         if (_isRun)
-            ChangeCurrentSpeedType(PlayerSpeed.SpeedType.Run);
+            ChangeCurrentSpeedType(MovementType.SpeedType.Run);
         else
-            ChangeCurrentSpeedType(PlayerSpeed.SpeedType.Walk);
+            ChangeCurrentSpeedType(MovementType.SpeedType.Walk);
     }
 
 
@@ -108,7 +115,7 @@ public class PlayerController : MonoBehaviour
         if(!_isSprint && _stamina.CurrentValue > 0)
         {
             _isSprint = true;
-            ChangeCurrentSpeedType(PlayerSpeed.SpeedType.Sprint);
+            ChangeCurrentSpeedType(MovementType.SpeedType.Sprint);
             _playerAnimator.SetBool("Sprint", _isSprint);
             _playerAnimator.SetBool("Run", !_isSprint);
         }
@@ -119,7 +126,7 @@ public class PlayerController : MonoBehaviour
         if(_isSprint)
         {
             _isSprint = false;
-            ChangeCurrentSpeedType(PlayerSpeed.SpeedType.Run);
+            ChangeCurrentSpeedType(MovementType.SpeedType.Run);
             _playerAnimator.SetBool("Sprint", _isSprint);
             _playerAnimator.SetBool("Run", !_isSprint);
         }
@@ -129,7 +136,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_body.velocity.magnitude > 0)
         {
-            var oppositeDir = -_body.velocity * _currentSpeed.Friction;
+            var oppositeDir = -_body.velocity * _currentMovement.Friction;
             _body.AddForce(oppositeDir * Time.deltaTime);
         }
     }
@@ -155,7 +162,7 @@ public class PlayerController : MonoBehaviour
         _isDashing = false;
     }
 
-    private void Move()
+    private void Move(Vector3 moveDir)
     {
         Vector3 target = _body.transform.InverseTransformDirection(_body.velocity);
         float velocityZ = target.z;
@@ -163,10 +170,10 @@ public class PlayerController : MonoBehaviour
 
         _playerAnimator.SetFloat("InputY", velocityZ, 0.1f, Time.deltaTime);
         _playerAnimator.SetFloat("InputX", velocityX, 0.1f, Time.deltaTime);
-        _body.AddRelativeForce(_moveDir.normalized * _currentSpeed.Acceleration * Time.deltaTime);
+        _body.AddRelativeForce(moveDir.normalized * _currentMovement.Acceleration * Time.deltaTime);
 
         if(_moveDir != Vector3.zero)
-            _currentSpeed.ReduceStamina(_stamina);
+            _currentMovement.ReduceStamina(_stamina);
 
         if (_isSprint)
             _stamina.RestRegenTimer();
@@ -178,7 +185,11 @@ public class PlayerController : MonoBehaviour
     private void GetMoveVector(InputAction.CallbackContext value)
     {
         var input = value.ReadValue<Vector2>();
-        _moveDir = new Vector3(input.x, 0, input.y);
+        if (!_focusInteractable)
+            _moveDir = new Vector3(input.x, 0, input.y);
+        else
+            _moveDir = Vector3.zero;
+
     }
 
     private void SetInputs()
@@ -189,27 +200,43 @@ public class PlayerController : MonoBehaviour
         _input.Player.Sprint.performed += EnableSprint;
         _input.Player.Sprint.canceled += _ => DisableSprint();
         _input.Player.Dash.performed += _ => Dash();
+        _input.Player.Interact.performed += _ => _lastInteractableObject?.Interact(this);
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent(out IInteractable i))
+            _lastInteractableObject = i;
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.TryGetComponent(out IInteractable i))
+            _lastInteractableObject = null;
+    }
+
+    public async void FocusToInteractable(Transform objectToFocus)
+    {
+        var pickAbleItem = objectToFocus.GetComponent<PickableItem>();
+
+        if(pickAbleItem)
+        {
+            Vector3 dirToItem = (pickAbleItem.transform.localPosition - transform.position).normalized;
+            transform.DORotate(dirToItem, 1).OnComplete(async () =>
+            {
+                while(Vector3.Distance(transform.position, pickAbleItem.transform.position) > pickAbleItem.PickUpDistance)
+                {
+                    Move(dirToItem.normalized);
+                    await Task.Yield();
+                }
+                _playerAnimator.SetTrigger("Take");
+                pickAbleItem.DestroyItemOnScene(1);
+            });
+        }
+    }
+
+
+    public void ResetInteractableFocus() => _focusInteractable = !_focusInteractable;
+
 }
 
-[Serializable]
-public class PlayerSpeed
-{
-    public enum SpeedType
-    {
-        Walk,
-        Run,
-        Sprint
-    }
-
-    [field: SerializeField] public SpeedType Type { get; private set; }
-    [field : SerializeField, Range(0,10000)] public float Acceleration { get; private set; }
-    [field: SerializeField, Range(0, 100)] public float StaminaPerSec { get; private set; }
-    public float Friction { get; private set; } = 500;
-
-    public void ReduceStamina(StaminaSystem stamina)
-    {
-        stamina.CurrentValue -= StaminaPerSec * Time.deltaTime;
-    }
-
-}

@@ -1,0 +1,11 @@
+﻿P:\i700\t$m$p$$$\i700.max
+P:\i700\t$m$p$$$\MAXFILES.TXT
+P:\i700\i700.png
+P:\i700\i700_bump.png
+P:\i700\beton.png
+P:\i700\betonbel.png
+P:\i700\niz.png
+P:\i700\dveri.png
+P:\i700\metal.png
+P:\POVAROVO2\obsh\rubber.png
+P:\POVAROVO2\landshaft\asf1.jpg

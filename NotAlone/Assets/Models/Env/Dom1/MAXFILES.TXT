@@ -1,0 +1,7 @@
+﻿P:\1p303\t$m$p$$$\1p303.max
+P:\1p303\t$m$p$$$\MAXFILES.TXT
+P:\POVAROVO2\9\303panel.png
+P:\POVAROVO2\obsh\beton.png
+P:\POVAROVO2\obsh\rubber.png
+P:\POVAROVO2\obsh\rubber_normal.png
+P:\POVAROVO2\9\brick.png

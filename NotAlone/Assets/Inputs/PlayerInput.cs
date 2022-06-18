@@ -89,6 +89,15 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""FlashLightCharge"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""ad5a4ab4-7011-4018-87c4-ec524055ed7a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -333,6 +342,28 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9325e342-dfe2-4652-a9df-95e1c74cdc43"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": ""Hold(pressPoint=0.3)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FlashLightCharge"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9a32af86-7aa1-4266-8b51-83a208feaa0f"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": ""Hold(pressPoint=0.3)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FlashLightCharge"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -348,6 +379,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         m_Player_LookDelta = m_Player.FindAction("LookDelta", throwIfNotFound: true);
         m_Player_Dash = m_Player.FindAction("Dash", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
+        m_Player_FlashLightCharge = m_Player.FindAction("FlashLightCharge", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -414,6 +446,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_LookDelta;
     private readonly InputAction m_Player_Dash;
     private readonly InputAction m_Player_Interact;
+    private readonly InputAction m_Player_FlashLightCharge;
     public struct PlayerActions
     {
         private @PlayerInput m_Wrapper;
@@ -425,6 +458,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         public InputAction @LookDelta => m_Wrapper.m_Player_LookDelta;
         public InputAction @Dash => m_Wrapper.m_Player_Dash;
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
+        public InputAction @FlashLightCharge => m_Wrapper.m_Player_FlashLightCharge;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -455,6 +489,9 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 @Interact.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteract;
                 @Interact.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteract;
                 @Interact.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteract;
+                @FlashLightCharge.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFlashLightCharge;
+                @FlashLightCharge.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFlashLightCharge;
+                @FlashLightCharge.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFlashLightCharge;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -480,6 +517,9 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 @Interact.started += instance.OnInteract;
                 @Interact.performed += instance.OnInteract;
                 @Interact.canceled += instance.OnInteract;
+                @FlashLightCharge.started += instance.OnFlashLightCharge;
+                @FlashLightCharge.performed += instance.OnFlashLightCharge;
+                @FlashLightCharge.canceled += instance.OnFlashLightCharge;
             }
         }
     }
@@ -493,5 +533,6 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         void OnLookDelta(InputAction.CallbackContext context);
         void OnDash(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
+        void OnFlashLightCharge(InputAction.CallbackContext context);
     }
 }

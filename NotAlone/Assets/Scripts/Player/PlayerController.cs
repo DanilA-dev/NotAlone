@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour, IInteractor
 
     #region Properties
 
+    public PlayerInput Input => _input;
     public GameObject GameObject => this.gameObject;
 
     #endregion

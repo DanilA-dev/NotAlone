@@ -4,17 +4,11 @@ using UnityEngine.UI;
 
 public class PlayerUI : MonoBehaviour
 {
-    [SerializeField] private Texture2D _gamePlayCursor;
     [SerializeField] private Image _healthFill;
     [SerializeField] private Image _staminaFill;
 
     private HealthSystem _playerHealth;
     private StaminaSystem _playerStamina;
-
-    private void Awake()
-    {
-        Cursor.SetCursor(_gamePlayCursor, new Vector2(_gamePlayCursor.width /2 , _gamePlayCursor.height/ 2), CursorMode.Auto);
-    }
 
     private void OnDestroy()
     {

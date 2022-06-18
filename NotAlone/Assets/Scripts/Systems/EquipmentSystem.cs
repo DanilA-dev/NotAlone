@@ -10,6 +10,13 @@ public class EquipmentSystem : MonoBehaviour
     [SerializeField] private List<Item> _equipableItemsInBack = new List<Item>();
     [SerializeField] private List<Item> _collectedItemsFromScene = new List<Item>();
 
+    private PlayerController _player;
+
+    private void Awake()
+    {
+        _player = GetComponentInParent<PlayerController>();
+    }
+
     public List<Item> Items => _collectedItemsFromScene;
 
     public void AddItem(Item newItem, bool tryToEquip)
@@ -30,7 +37,7 @@ public class EquipmentSystem : MonoBehaviour
         if (sameItemInBack)
         {
             await Task.Delay(milisec);
-            sameItemInBack.Equip();
+            sameItemInBack.Equip(_player);
         }
     }
 }

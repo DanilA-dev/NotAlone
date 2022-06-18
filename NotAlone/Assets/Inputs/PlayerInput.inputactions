@@ -67,6 +67,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "FlashLightCharge",
+                    "type": "PassThrough",
+                    "id": "ad5a4ab4-7011-4018-87c4-ec524055ed7a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -309,6 +318,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9325e342-dfe2-4652-a9df-95e1c74cdc43",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "Hold(pressPoint=0.3)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FlashLightCharge",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9a32af86-7aa1-4266-8b51-83a208feaa0f",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "Hold(pressPoint=0.3)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FlashLightCharge",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

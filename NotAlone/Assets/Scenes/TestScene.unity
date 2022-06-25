@@ -2295,6 +2295,16 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 1938303862}
+    - target: {fileID: 4754732741161431157, guid: 653eb10edf1c24943bf5a64d5c287eb0,
+        type: 3}
+      propertyPath: _playerMovements.Array.data[1].<AnimatorBool>k__BackingField
+      value: Run
+      objectReference: {fileID: 0}
+    - target: {fileID: 4754732741161431157, guid: 653eb10edf1c24943bf5a64d5c287eb0,
+        type: 3}
+      propertyPath: _playerMovements.Array.data[2].<AnimatorBool>k__BackingField
+      value: Sprint
+      objectReference: {fileID: 0}
     - target: {fileID: 4754732741492474092, guid: 653eb10edf1c24943bf5a64d5c287eb0,
         type: 3}
       propertyPath: m_RootOrder

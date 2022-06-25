@@ -22,22 +22,35 @@ public class PlayerController : MonoBehaviour, IInteractor
     [Space]
     [SerializeField] private List<MovementType> _playerMovements = new List<MovementType>();
 
+    private StateMachine _stateMachine;
+    private IState _idleState;
+    private IState _walkState;
+    private IState _runState;
+    private IState _sprintState;
+
     private IInteractable _lastInteractableObject;
     private MovementType _currentMovement;
     private PlayerInput _input;
     private Camera _cam;
 
     private bool _isDashing;
-    private bool _isSprint;
-    private bool _isRun;
 
     private Vector3 _moveDir;
     private Vector3 _dirToMouse;
 
     #region Properties
 
+    public IState IdleState => _idleState;
+    public IState WalkState => _walkState;
+    public IState RunState => _runState;
+    public IState SprintState => _sprintState;
+
+    public Vector3 MoveDir => _moveDir;
     public PlayerInput Input => _input;
+    public List<MovementType> PlayerMovements => _playerMovements;
+    public MovementType CurrentMoveType => _currentMovement;
     public GameObject GameObject => this.gameObject;
+    public StaminaSystem Stamina => _stamina;
 
     #endregion
 
@@ -50,9 +63,9 @@ public class PlayerController : MonoBehaviour, IInteractor
 
     private void OnEnable()
     {
-        _playerUI.InitPlayerValues(_health, _stamina);
-        ChangeCurrentSpeedType(MovementType.SpeedType.Walk);
+        _playerUI.InitPlayerValues(_health, Stamina);
         SetInputs();
+        EnableStateMachine();
     }
 
     private void OnDisable()
@@ -63,17 +76,29 @@ public class PlayerController : MonoBehaviour, IInteractor
     private void Update()
     {
         RotateTowardsMouse();
+        if(_stateMachine.CurrentState != null)
+            _stateMachine.Tick();
     }
 
     private void FixedUpdate()
     {
-        Move(_moveDir, false);
-        Friciton();
+        if (_stateMachine.CurrentState != null)
+            _stateMachine.FixedTick();
     }
 
-    private void ChangeCurrentSpeedType(MovementType.SpeedType type)
+    private void EnableStateMachine()
     {
-        _currentMovement = _playerMovements.Where(s => s.Type == type).FirstOrDefault();
+        _stateMachine = new StateMachine();
+        _idleState = new PlayerIdle(this, _stateMachine, _playerAnimator, _body);
+        _walkState = new PlayerWalk(this, _body, _playerAnimator,_stateMachine);
+        _runState = new PlayerRun(this, _body, _playerAnimator, _stateMachine);
+        _sprintState = new PlayerSprint(this, _body, _playerAnimator, _stateMachine);
+        _stateMachine.SetStartState(_idleState);
+    }
+
+    public void ChangeCurrentSpeedType(MovementType type)
+    {
+        _currentMovement = type;
     }
 
     private void RotateTowardsMouse()
@@ -100,52 +125,24 @@ public class PlayerController : MonoBehaviour, IInteractor
 
     private void HandleRun(InputAction.CallbackContext obj)
     {
-        _isRun = !_isRun;
-        _playerAnimator.SetBool("Run", _isRun);
-
-        if (_isRun)
-            ChangeCurrentSpeedType(MovementType.SpeedType.Run);
-        else
-            ChangeCurrentSpeedType(MovementType.SpeedType.Walk);
+        _stateMachine.ChangeState(RunState);
     }
 
 
     private void EnableSprint(InputAction.CallbackContext obj)
     {
-        if(!_isSprint && _stamina.CurrentValue > 0)
-        {
-            _isSprint = true;
-            ChangeCurrentSpeedType(MovementType.SpeedType.Sprint);
-            _playerAnimator.SetBool("Sprint", _isSprint);
-            _playerAnimator.SetBool("Run", !_isSprint);
-        }
     }
 
     private void DisableSprint()
     {
-        if(_isSprint)
-        {
-            _isSprint = false;
-            ChangeCurrentSpeedType(MovementType.SpeedType.Run);
-            _playerAnimator.SetBool("Sprint", _isSprint);
-            _playerAnimator.SetBool("Run", !_isSprint);
-        }
     }
 
-    private void Friciton()
-    {
-        if (_body.velocity.magnitude > 0)
-        {
-            var oppositeDir = -_body.velocity * _currentMovement.Friction;
-            _body.AddForce(oppositeDir * Time.deltaTime);
-        }
-    }
 
     private void Dash()
     {
-        _stamina.RestRegenTimer();
+        Stamina.ResetRegenTimer();
 
-        if(_moveDir != Vector3.zero && !_isDashing && _stamina.CurrentValue > 0)
+        if(_moveDir != Vector3.zero && !_isDashing && Stamina.CurrentValue > 0)
             StartCoroutine(Dashing(_dashCooldown, _moveDir));
     }
 
@@ -157,34 +154,11 @@ public class PlayerController : MonoBehaviour, IInteractor
         _playerAnimator.speed = speed;
         _isDashing = true;
         _body.AddRelativeForce(dir.normalized * _dashForce, ForceMode.Impulse);
-        _stamina.CurrentValue -= _staminaPerDash;
+        Stamina.CurrentValue -= _staminaPerDash;
         yield return new WaitForSeconds(dashCooldown);
         _isDashing = false;
     }
 
-    private void Move(Vector3 moveDir, bool useGlobalCoordinates)
-    {
-        Vector3 target = _body.transform.InverseTransformDirection(_body.velocity);
-        float velocityZ = target.z;
-        float velocityX = target.x;
-
-        _playerAnimator.SetFloat("InputY", velocityZ, 0.1f, Time.deltaTime);
-        _playerAnimator.SetFloat("InputX", velocityX, 0.1f, Time.deltaTime);
-
-        if(useGlobalCoordinates)
-            _body.AddForce(moveDir.normalized * _currentMovement.Acceleration * Time.deltaTime);
-        else
-            _body.AddRelativeForce(moveDir.normalized * _currentMovement.Acceleration * Time.deltaTime);
-
-        if (_moveDir != Vector3.zero)
-            _currentMovement.ReduceStamina(_stamina);
-
-        if (_isSprint)
-            _stamina.RestRegenTimer();
-
-        if (_isSprint && _moveDir.z < 0 || _moveDir.x != 0 || _stamina.CurrentValue <= 0)
-            DisableSprint();
-    }
 
     private void GetMoveVector(InputAction.CallbackContext value)
     {
@@ -225,7 +199,7 @@ public class PlayerController : MonoBehaviour, IInteractor
             {
                 Vector3 rotateDir = new Vector3(dirToItem.x, transform.position.y, dirToItem.z);
                 RotateTowards(rotateDir);
-                Move(dirToItem, true);
+              //  Move(dirToItem, true);
                 await Task.Yield();
             }
             _playerAnimator.SetTrigger("Take");

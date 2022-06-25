@@ -13,6 +13,7 @@ public class MovementType
         Sprint
     }
 
+    [field : SerializeField] public string AnimatorBool { get; set; }
     [field: SerializeField] public SpeedType Type { get; private set; }
     [field : SerializeField, Range(0,10000)] public float Acceleration { get; private set; }
     [field: SerializeField, Range(0, 100)] public float StaminaPerSec { get; private set; }

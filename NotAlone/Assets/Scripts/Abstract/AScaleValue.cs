@@ -37,7 +37,7 @@ public abstract class AScaleValue : MonoBehaviour
         _currentValue = _topValue;
     }
 
-    public void RestRegenTimer()
+    public void ResetRegenTimer()
     {
         _currentRegenTime = _regenAfterTime;
     }

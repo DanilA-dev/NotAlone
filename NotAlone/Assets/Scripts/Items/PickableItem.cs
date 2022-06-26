@@ -1,7 +1,6 @@
 using TMPro;
 using UnityEngine;
 using DG.Tweening;
-using System;
 using System.Threading.Tasks;
 
 [RequireComponent(typeof(SphereCollider))]
@@ -29,9 +28,9 @@ public class PickableItem : MonoBehaviour, IInteractable
 
     private void AddItemToEquipment(IInteractor interactor)
     {
-        var equipmentSystem = interactor.GameObject.GetComponentInChildren<EquipmentSystem>();
+        var equipmentSystem = interactor.Interactor.GetComponentInChildren<EquipmentSystem>();
         if (equipmentSystem)
-            equipmentSystem.AddItem(_itemToEquipment, true);
+            equipmentSystem.AddItem(_itemToEquipment);
     }
 
     public async void DisableItemOnScene()
@@ -42,7 +41,7 @@ public class PickableItem : MonoBehaviour, IInteractable
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out IInteractor interactor))
+        if (other.TryGetComponent(out PlayerController interactor))
         {
             _pickUpText.gameObject.SetActive(true);
             _pickUpText.DOFade(1, 1).From(0);
@@ -51,13 +50,13 @@ public class PickableItem : MonoBehaviour, IInteractable
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.TryGetComponent(out IInteractor interactor))
+        if (other.TryGetComponent(out PlayerController interactor))
             _pickUpText.gameObject.SetActive(true);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if(other.TryGetComponent(out IInteractor interactor))
+        if(other.TryGetComponent(out PlayerController interactor))
             _pickUpText.DOFade(0, 1).OnComplete(() => _pickUpText.gameObject.SetActive(false));
     }
 }

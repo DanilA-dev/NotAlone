@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 [Serializable]
@@ -13,7 +11,6 @@ public class MovementType
         Sprint
     }
 
-    [field : SerializeField] public string AnimatorBool { get; set; }
     [field: SerializeField] public SpeedType Type { get; private set; }
     [field : SerializeField, Range(0,10000)] public float Acceleration { get; private set; }
     [field: SerializeField, Range(0, 100)] public float StaminaPerSec { get; private set; }
@@ -21,6 +18,9 @@ public class MovementType
 
     public void ReduceStamina(StaminaSystem stamina)
     {
+        if (StaminaPerSec <= 0)
+            return;
+
         stamina.CurrentValue -= StaminaPerSec * Time.deltaTime;
     }
 }

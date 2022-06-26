@@ -1,11 +1,9 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Threading.Tasks;
 
-public class PlayerController : MonoBehaviour, IInteractor
+public class PlayerController : MonoBehaviour
 {
     [Header("Systems")]
     [SerializeField] private HealthSystem _health;
@@ -23,34 +21,36 @@ public class PlayerController : MonoBehaviour, IInteractor
     [SerializeField] private List<MovementType> _playerMovements = new List<MovementType>();
 
     private StateMachine _stateMachine;
-    private IState _idleState;
-    private IState _walkState;
-    private IState _runState;
-    private IState _sprintState;
+    private IState _idle;
+    private IState _walk;
+    private IState _run;
+    private IState _sprint;
+    private IState _dash;
+    private IState _objectInteraction;
 
     private IInteractable _lastInteractableObject;
     private MovementType _currentMovement;
     private PlayerInput _input;
     private Camera _cam;
 
-    private bool _isDashing;
-
     private Vector3 _moveDir;
     private Vector3 _dirToMouse;
 
     #region Properties
 
-    public IState IdleState => _idleState;
-    public IState WalkState => _walkState;
-    public IState RunState => _runState;
-    public IState SprintState => _sprintState;
-
+    public IState IdleState => _idle;
+    public IState WalkState => _walk;
+    public IState RunState => _run;
+    public IState SprintState => _sprint;
+    public IState DashState => _dash;
+    public IState ObjectInteraction => _objectInteraction; 
     public Vector3 MoveDir => _moveDir;
     public PlayerInput Input => _input;
     public List<MovementType> PlayerMovements => _playerMovements;
     public MovementType CurrentMoveType => _currentMovement;
-    public GameObject GameObject => this.gameObject;
+    public GameObject Interactor => this.gameObject;
     public StaminaSystem Stamina => _stamina;
+
 
     #endregion
 
@@ -73,6 +73,18 @@ public class PlayerController : MonoBehaviour, IInteractor
         ToogleInput(false);
     }
 
+    private void SetInputs()
+    {
+        _input.Player.Move.performed += GetMoveVector;
+        _input.Player.Run.performed += HandleRun;
+        _input.Player.Sprint.performed += HandleSprint;
+        _input.Player.Sprint.canceled += _ => DisableSprint();
+        _input.Player.Dash.performed += HandleDash;
+        _input.Player.Interact.performed += HandleObjectInteraction;
+    }
+
+   
+
     private void Update()
     {
         RotateTowardsMouse();
@@ -89,11 +101,13 @@ public class PlayerController : MonoBehaviour, IInteractor
     private void EnableStateMachine()
     {
         _stateMachine = new StateMachine();
-        _idleState = new PlayerIdle(this, _stateMachine, _playerAnimator, _body);
-        _walkState = new PlayerWalk(this, _body, _playerAnimator,_stateMachine);
-        _runState = new PlayerRun(this, _body, _playerAnimator, _stateMachine);
-        _sprintState = new PlayerSprint(this, _body, _playerAnimator, _stateMachine);
-        _stateMachine.SetStartState(_idleState);
+        _idle = new PlayerIdle(this, _stateMachine, _playerAnimator, _body);
+        _walk = new PlayerWalk(this, _body, _playerAnimator,_stateMachine);
+        _run = new PlayerRun(this, _body, _playerAnimator, _stateMachine);
+        _sprint = new PlayerSprint(this, _body, _playerAnimator, _stateMachine);
+        _dash = new PlayerDash(this, _playerAnimator, _body, _dashForce, _dashCooldown, _staminaPerDash, _stateMachine);
+        _objectInteraction = new PlayerObjectInteraction(this, _body, _playerAnimator);
+        _stateMachine.SetStartState(_idle);
     }
 
     public void ChangeCurrentSpeedType(MovementType type)
@@ -112,68 +126,63 @@ public class PlayerController : MonoBehaviour, IInteractor
                 _dirToMouse = hit.point - transform.position;
                 _dirToMouse.y = 0;
                 _dirToMouse.Normalize();
-                RotateTowards(_dirToMouse);
+                Quaternion r = Quaternion.LookRotation(_dirToMouse, Vector3.up);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, r, _rotationSpeed * Time.deltaTime);
             }
         }
     }
 
-    private void RotateTowards(Vector3 dir)
-    {
-        Quaternion r = Quaternion.LookRotation(dir, Vector3.up);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, r, _rotationSpeed * Time.deltaTime);
-    }
+    #region States
 
     private void HandleRun(InputAction.CallbackContext obj)
     {
-        _stateMachine.ChangeState(RunState);
+        if (_stateMachine.CurrentState != RunState)
+            _stateMachine.ChangeState(RunState);
+        else
+            _stateMachine.ChangeState(WalkState);
     }
 
 
-    private void EnableSprint(InputAction.CallbackContext obj)
+    private void HandleSprint(InputAction.CallbackContext obj)
     {
+        if (_stateMachine.CurrentState != SprintState && _stamina.CurrentValue > 0)
+            _stateMachine.ChangeState(SprintState);
     }
 
     private void DisableSprint()
     {
+        if (_stateMachine.CurrentState == SprintState)
+            _stateMachine.ChangeState(_stateMachine.PreviousState);
     }
 
-
-    private void Dash()
+    private void HandleDash(InputAction.CallbackContext obj)
     {
-        Stamina.ResetRegenTimer();
-
-        if(_moveDir != Vector3.zero && !_isDashing && Stamina.CurrentValue > 0)
-            StartCoroutine(Dashing(_dashCooldown, _moveDir));
+        var dashState = _dash as PlayerDash;
+        if (dashState.CanDash())
+            _stateMachine.ChangeState(DashState);
     }
-
-    private IEnumerator Dashing(float dashCooldown, Vector3 dir)
+    private void HandleObjectInteraction(InputAction.CallbackContext obj)
     {
-        float speed = _playerAnimator.speed;
-        _playerAnimator.speed = 0;
-        yield return new WaitForEndOfFrame();
-        _playerAnimator.speed = speed;
-        _isDashing = true;
-        _body.AddRelativeForce(dir.normalized * _dashForce, ForceMode.Impulse);
-        Stamina.CurrentValue -= _staminaPerDash;
-        yield return new WaitForSeconds(dashCooldown);
-        _isDashing = false;
+        if(_stateMachine.CurrentState != ObjectInteraction)
+        {
+            _lastInteractableObject?.Interact(ObjectInteraction as PlayerObjectInteraction);
+            _stateMachine.ChangeState(ObjectInteraction);
+        }    
+    }
+
+    public void DisableInteractionState()
+    {
+        if (_stateMachine.CurrentState == ObjectInteraction)
+            _stateMachine.ChangeState(_stateMachine.PreviousState);
     }
 
 
+
+    #endregion
     private void GetMoveVector(InputAction.CallbackContext value)
     {
         var input = value.ReadValue<Vector2>();
         _moveDir = new Vector3(input.x, 0, input.y);
-    }
-
-    private void SetInputs()
-    {
-        _input.Player.Move.performed += GetMoveVector;
-        _input.Player.Run.performed += HandleRun;
-        _input.Player.Sprint.performed += EnableSprint;
-        _input.Player.Sprint.canceled += _ => DisableSprint();
-        _input.Player.Dash.performed += _ => Dash();
-        _input.Player.Interact.performed += _ => _lastInteractableObject?.Interact(this);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -188,26 +197,8 @@ public class PlayerController : MonoBehaviour, IInteractor
             _lastInteractableObject = null;
     }
 
-    public async void FocusToInteractable(Transform objectToFocus)
-    {
-        var pickAbleItem = objectToFocus.GetComponent<PickableItem>();
-        if(pickAbleItem)
-        {
-            ToogleInput(false);
-            Vector3 dirToItem = (objectToFocus.position - transform.position).normalized;
-            while (Vector3.Distance(transform.position, pickAbleItem.transform.position) > pickAbleItem.PickUpDistance)
-            {
-                Vector3 rotateDir = new Vector3(dirToItem.x, transform.position.y, dirToItem.z);
-                RotateTowards(rotateDir);
-              //  Move(dirToItem, true);
-                await Task.Yield();
-            }
-            _playerAnimator.SetTrigger("Take");
-            pickAbleItem.DisableItemOnScene();
-        }
-    }
 
-    private bool ToogleInput(bool value)
+    public bool ToogleInput(bool value)
     {
         bool i = value;
 
@@ -218,7 +209,5 @@ public class PlayerController : MonoBehaviour, IInteractor
 
         return i;
     }    
-
-    public void ResetInteractableFocus() => ToogleInput(true);
 }
 

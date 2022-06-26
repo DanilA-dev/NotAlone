@@ -5,10 +5,11 @@ using UnityEngine;
 public class BasePlayerMove : IState
 {
     protected Animator _playerAnimator;
-    private Rigidbody _body;
-    private MovementType _moveType;
-    private PlayerController _playerController;
-    private StateMachine _stateMachine;
+    protected StateMachine _stateMachine;
+    protected Rigidbody _body;
+    protected MovementType _moveType;
+    protected PlayerController _playerController;
+
     private IState _idleState;
 
     public virtual MovementType.SpeedType MoveType { get; }
@@ -35,13 +36,13 @@ public class BasePlayerMove : IState
         _playerController.ChangeCurrentSpeedType(_moveType);
     }
 
-    public void ExecuteFixedUpdate()
+    public virtual void ExecuteFixedUpdate()
     {
         Move();
         Friciton();
     }
 
-    public void ExecuteUpdate()
+    public virtual   void ExecuteUpdate()
     {
        if (_playerController.MoveDir == Vector3.zero)
             _stateMachine.ChangeState(_idleState);

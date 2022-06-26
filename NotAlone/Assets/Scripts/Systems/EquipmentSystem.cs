@@ -12,6 +12,8 @@ public class EquipmentSystem : MonoBehaviour
 
     private PlayerController _player;
 
+    public static event Action<Item> OnItemCollect;
+
     private void Awake()
     {
         _player = GetComponentInParent<PlayerController>();
@@ -19,10 +21,11 @@ public class EquipmentSystem : MonoBehaviour
 
     public List<Item> Items => _collectedItemsFromScene;
 
-    public void AddItem(Item newItem, bool tryToEquip)
+    public void AddItem(Item newItem)
     {
         _collectedItemsFromScene.Add(newItem);
-        tryToEquip = newItem.ItemType == ItemType.Equipable;
+        OnItemCollect?.Invoke(newItem);
+       var tryToEquip = newItem.ItemType == ItemType.Equipable;
         if (tryToEquip)
             FindInBackAndEquip(newItem,2000);
     }

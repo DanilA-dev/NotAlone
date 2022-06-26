@@ -8,6 +8,7 @@ public class StateMachine
     private bool _canExecuteState = false;
 
     public IState CurrentState => _currentState;
+    public IState PreviousState => _previousState;
 
     public void SetStartState(IState startState)
     {

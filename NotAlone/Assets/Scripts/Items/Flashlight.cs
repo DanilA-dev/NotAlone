@@ -10,6 +10,7 @@ public class Flashlight : Item
 
 
     private PlayerInput _input;
+    public override string PickUpDescription => "Flashlight picked.";
 
     public override void Equip(PlayerController player)
     {
@@ -17,21 +18,30 @@ public class Flashlight : Item
         _chargedLightBeam.SetActive(false);
         _input = player.Input;
         _input.Player.FlashLightCharge.performed += PerformChargeLight;
+        _input.Player.FlashLightCharge.canceled += CancelChargeLight;
         Equiped = true;
         this.gameObject.SetActive(true);
         _rigIK.weight = 1;
     }
 
+   
     public override void UnEquip()
     {
         Equiped = false;
         _input.Player.FlashLightCharge.performed -= PerformChargeLight;
+        _input.Player.FlashLightCharge.canceled -= CancelChargeLight;
         this.gameObject.SetActive(false);
         _rigIK.weight = 0;
     }
 
     private void PerformChargeLight(InputAction.CallbackContext obj)
     {
-
+        Debug.Log("Charge");
     }
+
+    private void CancelChargeLight(InputAction.CallbackContext obj)
+    {
+        Debug.Log("Cancel");
+    }
+
 }

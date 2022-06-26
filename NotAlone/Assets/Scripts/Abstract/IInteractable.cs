@@ -3,7 +3,7 @@ using UnityEngine;
 
 public interface IInteractor
 {
-    GameObject GameObject { get; }
+    Transform Interactor { get; }
     void FocusToInteractable(Transform objectToFocus);
 }
 

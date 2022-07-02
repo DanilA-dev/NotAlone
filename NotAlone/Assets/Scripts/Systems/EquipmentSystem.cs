@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,39 +6,54 @@ using UnityEngine;
 
 public class EquipmentSystem : MonoBehaviour
 {
-    [SerializeField] private List<Item> _equipableItemsInBack = new List<Item>();
-    [SerializeField] private List<Item> _collectedItemsFromScene = new List<Item>();
+    [SerializeField] private Inventory _inventory;
 
+    private List<Item> _equipableItems = new List<Item>();
     private PlayerController _player;
 
-    public static event Action<Item> OnItemCollect;
+    public static event Action<InventoryItem> OnItemCollect;
 
     private void Awake()
     {
         _player = GetComponentInParent<PlayerController>();
+        GetEquipableItems();
+        LoadInventory();
     }
 
-    public List<Item> Items => _collectedItemsFromScene;
-
-    public void AddItem(Item newItem)
+    private void GetEquipableItems()
     {
-        _collectedItemsFromScene.Add(newItem);
+        foreach (Transform child in transform)
+        {
+            if (child.TryGetComponent(out Item item) && item.InventoryItem.type == InventoryItemType.Equipable)
+                _equipableItems.Add(item);
+        }
+    }
+
+    private void LoadInventory()
+    {
+        //load from save
+        for (int i = 0; i < _inventory.GetEquipedItems().Count; i++)
+            FindInBackAndEquip(_inventory.GetEquipedItems()[i], 500);
+
+    }
+
+    public void AddItemToInventory(InventoryItem newItem)
+    {
         OnItemCollect?.Invoke(newItem);
-       var tryToEquip = newItem.ItemType == ItemType.Equipable;
+        _inventory.AddItem(newItem);
+        var tryToEquip = newItem.type == InventoryItemType.Equipable;
         if (tryToEquip)
             FindInBackAndEquip(newItem,2000);
     }
 
-    public void RemoveItem(Item newItem)
+   
+    private async void FindInBackAndEquip(InventoryItem newItem, int milisec)
     {
-        _collectedItemsFromScene.Remove(newItem);
-    }
-    private async void FindInBackAndEquip(Item newItem, int milisec)
-    {
-        var sameItemInBack = _equipableItemsInBack.Where(i => i.ID == newItem.ID).FirstOrDefault();
+        var sameItemInBack = _equipableItems.Where(i => i.ID == newItem.id).FirstOrDefault();
         if (sameItemInBack)
         {
             await Task.Delay(milisec);
+            newItem.state = InventoryItemState.Equiped;
             sameItemInBack.Equip(_player);
         }
     }

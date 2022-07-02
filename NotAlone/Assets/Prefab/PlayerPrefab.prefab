@@ -3523,14 +3523,20 @@ PrefabInstance:
       objectReference: {fileID: 4754732741397990319}
     - target: {fileID: 4409040079363178615, guid: 5e5d68c853089e948a0ec5597368b5a0,
         type: 3}
+      propertyPath: _inventoryItem
+      value: 
+      objectReference: {fileID: 11400000, guid: 7af51c81cfcbb7741888da2f0cd50abc,
+        type: 2}
+    - target: {fileID: 4409040079363178615, guid: 5e5d68c853089e948a0ec5597368b5a0,
+        type: 3}
       propertyPath: _chargedLightBeam
       value: 
-      objectReference: {fileID: 1628002712}
+      objectReference: {fileID: 1628002719}
     - target: {fileID: 4409040079363178615, guid: 5e5d68c853089e948a0ec5597368b5a0,
         type: 3}
       propertyPath: _defaultLightBeam
       value: 
-      objectReference: {fileID: 1397201901}
+      objectReference: {fileID: 1397201908}
     - target: {fileID: 4443175688978998493, guid: 5e5d68c853089e948a0ec5597368b5a0,
         type: 3}
       propertyPath: m_Layer
@@ -3591,9 +3597,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae2a302c6e515584289de0351bedb938, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _equipableItemsInBack:
-  - {fileID: 9033380748426184991}
-  _collectedItemsFromScene: []
+  _inventory: {fileID: 0}
 --- !u!1 &4753635980760962538 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 114071877024570498, guid: 5e5d68c853089e948a0ec5597368b5a0,
@@ -3619,7 +3623,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 4754732741161431157}
           m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-          m_MethodName: ResetInteractableFocus
+          m_MethodName: DisableInteractionState
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -3663,18 +3667,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aeda7bfbf984f2a4da5ab4b8967b115d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &9033380748426184991 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4409040079363178615, guid: 5e5d68c853089e948a0ec5597368b5a0,
-    type: 3}
-  m_PrefabInstance: {fileID: 4642381606717000040}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 54a2408cdd0d7a64c89d06371d3ea1af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &4694733718804018658
@@ -3798,6 +3790,41 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Camera
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1664777498222869824, guid: 9a4c0c9ab4ed4834292fc090bebdd5e2,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6881306558824485376, guid: 9a4c0c9ab4ed4834292fc090bebdd5e2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -27.39795
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879547339745904287, guid: 9a4c0c9ab4ed4834292fc090bebdd5e2,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 55.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879547339745904287, guid: 9a4c0c9ab4ed4834292fc090bebdd5e2,
+        type: 3}
+      propertyPath: m_fontColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879547339745904287, guid: 9a4c0c9ab4ed4834292fc090bebdd5e2,
+        type: 3}
+      propertyPath: m_fontColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879547339745904287, guid: 9a4c0c9ab4ed4834292fc090bebdd5e2,
+        type: 3}
+      propertyPath: m_fontSizeMax
+      value: 98.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879547339745904287, guid: 9a4c0c9ab4ed4834292fc090bebdd5e2,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 55.2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9a4c0c9ab4ed4834292fc090bebdd5e2, type: 3}

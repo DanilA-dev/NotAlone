@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -31,7 +32,7 @@ public class PlayerObjectInteraction : IState, IInteractor
         _playerController.ToogleInput(true);
     }
 
-    public async void FocusToInteractable(Transform objectToFocus)
+    public async void FocusToInteractable(Transform objectToFocus, Action onInteractionEnd)
     {
         var pickAbleItem = objectToFocus.GetComponent<PickableItem>();
         if (pickAbleItem)
@@ -49,6 +50,7 @@ public class PlayerObjectInteraction : IState, IInteractor
                 await Task.Yield();
             }
             _playerAnimator.SetTrigger("Take");
+            onInteractionEnd?.Invoke();
             pickAbleItem.DisableItemOnScene();
         }
     }

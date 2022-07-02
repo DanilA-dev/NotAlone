@@ -11,14 +11,14 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private CanvasGroup _statsGroup;
     [SerializeField] private TMP_Text _pickUpItemDescription;
     [SerializeField] private TMP_Text _stateDebug;
-    [SerializeField] private GameObject _notePanel;
+    [SerializeField] private NoteMenu _notePanel;
 
     private HealthSystem _playerHealth;
     private StaminaSystem _playerStamina;
 
     public void InitPlayerValues(HealthSystem playerHealthSytem, StaminaSystem playerStaminaSystem)
     {
-        _notePanel.SetActive(false);
+        _notePanel.gameObject.SetActive(false);
         _playerHealth = playerHealthSytem;
         _playerStamina = playerStaminaSystem;
         _playerHealth.OnValueChanged += OnHealthChanged;
@@ -60,24 +60,26 @@ public class PlayerUI : MonoBehaviour
         seq.Append(_statsGroup.DOFade(0, 1));
     }
 
-    private async void OnItemEquip(Item someItem)
+    private async void OnItemEquip(InventoryItem someItem)
     {
-        if (someItem.ItemType == ItemType.Note)
+        if (someItem.type == InventoryItemType.Note)
         {
+            var note = someItem as NoteInventoryItem;
             await Task.Delay(1000);
-            _notePanel.SetActive(true);
+            _notePanel.gameObject.SetActive(true);
+            _notePanel.UpdateText(note.noteDescription);
         }
         else
             CollectTween(someItem);
     }
 
-    private void CollectTween(Item someItem)
+    private void CollectTween(InventoryItem someItem)
     {
-        _pickUpItemDescription.SetText(someItem.PickUpDescription);
+        _pickUpItemDescription.SetText(someItem.itemName + "picked up.");
         var seq = DOTween.Sequence();
         seq.Append(_pickUpItemDescription.DOFade(1, 1).From(0));
         seq.AppendInterval(3f);
-        seq.Append(_pickUpItemDescription.DOFade(0, 1).From(0));
+        seq.Append(_pickUpItemDescription.DOFade(0, 1));
     }
     
 }

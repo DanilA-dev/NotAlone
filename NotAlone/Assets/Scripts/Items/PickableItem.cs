@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 [RequireComponent(typeof(SphereCollider))]
 public class PickableItem : MonoBehaviour, IInteractable
 {
-    [SerializeField] private Item _itemToEquipment;
+    [SerializeField] private InventoryItem _itemToPickUp;
     [SerializeField] private float _pickUpDistance;
     [SerializeField] private TMP_Text _pickUpText;
 
@@ -22,15 +22,16 @@ public class PickableItem : MonoBehaviour, IInteractable
     public void Interact(IInteractor interactor)
     {
         _interactor = interactor;
-        _interactor.FocusToInteractable(this.transform);
-        AddItemToEquipment(interactor);
+        _interactor.FocusToInteractable(this.transform, AddToInventory);
     }
 
-    private void AddItemToEquipment(IInteractor interactor)
+    private void AddToInventory()
     {
-        var equipmentSystem = interactor.Interactor.GetComponentInChildren<EquipmentSystem>();
-        if (equipmentSystem)
-            equipmentSystem.AddItem(_itemToEquipment);
+        if (_interactor == null)
+            return;
+
+        var equipmentSystem = _interactor.Interactor.GetComponentInChildren<EquipmentSystem>();
+        equipmentSystem.AddItemToInventory(_itemToPickUp);
     }
 
     public async void DisableItemOnScene()

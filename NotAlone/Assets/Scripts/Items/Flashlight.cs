@@ -5,21 +5,19 @@ using UnityEngine.InputSystem;
 public class Flashlight : Item
 {
     [SerializeField] private TwoBoneIKConstraint _rigIK;
-    [SerializeField] private GameObject _defaultLightBeam;
-    [SerializeField] private GameObject _chargedLightBeam;
+    [SerializeField] private DamageCollider _defaultLightBeam;
+    [SerializeField] private DamageCollider _chargedLightBeam;
 
 
     private PlayerInput _input;
-    public override string PickUpDescription => "Flashlight picked.";
 
     public override void Equip(PlayerController player)
     {
-        _defaultLightBeam.SetActive(true);
-        _chargedLightBeam.SetActive(false);
+        _defaultLightBeam.gameObject.SetActive(true);
+        _chargedLightBeam.gameObject.SetActive(false);
         _input = player.Input;
         _input.Player.FlashLightCharge.performed += PerformChargeLight;
         _input.Player.FlashLightCharge.canceled += CancelChargeLight;
-        Equiped = true;
         this.gameObject.SetActive(true);
         _rigIK.weight = 1;
     }
@@ -27,7 +25,6 @@ public class Flashlight : Item
    
     public override void UnEquip()
     {
-        Equiped = false;
         _input.Player.FlashLightCharge.performed -= PerformChargeLight;
         _input.Player.FlashLightCharge.canceled -= CancelChargeLight;
         this.gameObject.SetActive(false);

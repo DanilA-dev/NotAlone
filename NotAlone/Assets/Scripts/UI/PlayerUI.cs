@@ -10,6 +10,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private Image _staminaFill;
     [SerializeField] private CanvasGroup _statsGroup;
     [SerializeField] private TMP_Text _pickUpItemDescription;
+    [SerializeField] private TMP_Text _stateDebug;
     [SerializeField] private GameObject _notePanel;
 
     private HealthSystem _playerHealth;
@@ -33,6 +34,11 @@ public class PlayerUI : MonoBehaviour
         _playerStamina.OnValueChanged -= OnStaminaChanged;
     }
 
+
+    public void ChangeStateDebug(string state)
+    {
+        _stateDebug.SetText($"Player state is {state}");
+    }
 
     private void OnStaminaChanged(float curValue, float maxValue)
     {

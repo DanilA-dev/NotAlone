@@ -42,6 +42,10 @@ public class PlayerObjectInteraction : IState, IInteractor
                 Vector3 rotateDir = new Vector3(dirToItem.x, Interactor.position.y, dirToItem.z);
                 RotateTowards(rotateDir);
                 MoveToObject(dirToItem);
+
+                if (Vector3.Distance(_playerController.transform.position, pickAbleItem.transform.position) < pickAbleItem.PickUpDistance)
+                     break;
+
                 await Task.Yield();
             }
             _playerAnimator.SetTrigger("Take");

@@ -101,6 +101,7 @@ public class PlayerController : MonoBehaviour
     private void EnableStateMachine()
     {
         _stateMachine = new StateMachine();
+        _stateMachine.OnStateChange += () => _playerUI.ChangeStateDebug(_stateMachine.CurrentState.ToString());
         _idle = new PlayerIdle(this, _stateMachine, _playerAnimator, _body);
         _walk = new PlayerWalk(this, _body, _playerAnimator,_stateMachine);
         _run = new PlayerRun(this, _body, _playerAnimator, _stateMachine);
@@ -121,10 +122,14 @@ public class PlayerController : MonoBehaviour
         Ray ray = _cam.ScreenPointToRay(_input.Player.Look.ReadValue<Vector2>());
         if(lookDelta != Vector3.zero)
         {
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            if (Physics.SphereCast(ray, 0.5f, out RaycastHit hit))
             {
                 _dirToMouse = hit.point - transform.position;
                 _dirToMouse.y = 0;
+
+                if (_dirToMouse.magnitude < 1)
+                    return;
+
                 _dirToMouse.Normalize();
                 Quaternion r = Quaternion.LookRotation(_dirToMouse, Vector3.up);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, r, _rotationSpeed * Time.deltaTime);

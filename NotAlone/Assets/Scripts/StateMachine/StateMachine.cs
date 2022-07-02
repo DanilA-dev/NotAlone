@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class StateMachine 
@@ -7,6 +8,8 @@ public class StateMachine
 
     private bool _canExecuteState = false;
 
+    public Action OnStateChange;
+
     public IState CurrentState => _currentState;
     public IState PreviousState => _previousState;
 
@@ -15,7 +18,6 @@ public class StateMachine
         _currentState = startState;
         _currentState.Enter();
         _canExecuteState = true;
-        Debug.Log(_currentState.ToString());
     }
 
     public void ChangeState(IState newState)
@@ -29,7 +31,7 @@ public class StateMachine
         _currentState = newState;
         _currentState?.Enter();
         _canExecuteState = true;
-        Debug.Log(_currentState);
+        OnStateChange?.Invoke();
     }
 
     public void Tick()

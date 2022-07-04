@@ -2,11 +2,8 @@ using UnityEngine;
 
 public class PlayerWalk : BasePlayerMove
 {
-    public PlayerWalk(PlayerController playerController, Rigidbody body, Animator playerAnimator,
-         StateMachine stateMachine)
-       : base(playerController, body, playerAnimator, stateMachine)
-    {
-    }
+    public PlayerWalk(PlayerController playerController, PlayerStatesFabric fabric) : base(playerController, fabric) { }
+
 
     public override MovementType.SpeedType MoveType => MovementType.SpeedType.Walk;
 }

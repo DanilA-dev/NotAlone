@@ -7,27 +7,18 @@ public class PlayerIdle : IState
     private Rigidbody _body;
     private Animator _animator;
     private StateMachine _stateMachine;
-    private IState _walkState;
+    private PlayerStatesFabric _statesFarbic;
 
-
-    public PlayerIdle(PlayerController player, StateMachine stateMachine, Animator animator, Rigidbody body)
+    public PlayerIdle(PlayerController player, PlayerStatesFabric statesFarbic)
     {
         _playerController = player;
-        _stateMachine = stateMachine;
-        _animator = animator;
-        _body = body;
-        GetTransitionState();
+        _body = player.Body;
+        _animator = player.Animator;
+        _statesFarbic = statesFarbic;
+        _stateMachine = player.StateMachine;
     }
 
-    private async void GetTransitionState()
-    {
-        await Task.Delay(300);
-        _walkState = _playerController.WalkState;
-    }
-
-    public void Enter()
-    {
-    }
+    public void Enter() { }
 
     public void ExecuteFixedUpdate()
     {
@@ -43,7 +34,7 @@ public class PlayerIdle : IState
         }
 
         if (_playerController.MoveDir != Vector3.zero)
-            _stateMachine?.ChangeState(_walkState);
+            _stateMachine?.ChangeState(_statesFarbic.Walk());
 
     }
 

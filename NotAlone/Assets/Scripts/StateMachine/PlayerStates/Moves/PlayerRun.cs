@@ -3,11 +3,7 @@ using UnityEngine;
 public class PlayerRun : BasePlayerMove
 {
     public override MovementType.SpeedType MoveType => MovementType.SpeedType.Run;
-    public PlayerRun(PlayerController playerController, Rigidbody body, Animator playerAnimator,
-         StateMachine stateMachine)
-       : base(playerController, body, playerAnimator, stateMachine)
-    {
-    }
+    public PlayerRun(PlayerController playerController, PlayerStatesFabric fabric) : base(playerController, fabric) { }
 
     public override void Enter()
     {

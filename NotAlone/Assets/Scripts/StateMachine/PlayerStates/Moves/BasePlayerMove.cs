@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class BasePlayerMove : IState
@@ -9,26 +8,17 @@ public class BasePlayerMove : IState
     protected Rigidbody _body;
     protected MovementType _moveType;
     protected PlayerController _playerController;
-
-    private IState _idleState;
-
+    protected PlayerStatesFabric _statesFabric;
     public virtual MovementType.SpeedType MoveType { get; }
 
-    public BasePlayerMove(PlayerController playerController, Rigidbody body,
-        Animator playerAnimator, StateMachine stateMachine)
+    public BasePlayerMove(PlayerController player, PlayerStatesFabric statesFabric)
     {
-        _playerController = playerController;
-        _body = body;
-        _playerAnimator = playerAnimator;
+        _statesFabric = statesFabric;
+        _playerController = player;
+        _body = player.Body;
+        _playerAnimator = player.Animator;
         _moveType = _playerController.PlayerMovements.Where(m => m.Type == MoveType).FirstOrDefault();
-        _stateMachine = stateMachine;
-        GetTransitionState();
-    }
-
-    private async void GetTransitionState()
-    {
-        await Task.Delay(300);
-        _idleState = _playerController.IdleState;
+        _stateMachine = player.StateMachine;
     }
 
     public virtual void Enter()
@@ -45,7 +35,7 @@ public class BasePlayerMove : IState
     public virtual   void ExecuteUpdate()
     {
        if (_playerController.MoveDir == Vector3.zero)
-            _stateMachine.ChangeState(_idleState);
+            _stateMachine.ChangeState(_statesFabric.Idle());
     }
    
     public virtual void Exit() { }

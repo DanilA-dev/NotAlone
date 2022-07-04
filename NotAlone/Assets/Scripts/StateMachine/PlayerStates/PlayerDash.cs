@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -15,16 +14,15 @@ public class PlayerDash : IState
 
     private bool _isDashing;
 
-    public PlayerDash(PlayerController playerController, Animator animator, Rigidbody body,
-        float dashForce, float dashCooldown, float staminaPerDash, StateMachine stateMachine)
+    public PlayerDash(PlayerController player)
     {
-        _playerController = playerController;
-        _animator = animator;
-        _body = body;
-        _dashForce = dashForce;
-        _dashCooldown = dashCooldown;
-        _staminaPerDash = staminaPerDash;
-        _stateMachine = stateMachine;
+        _playerController = player;
+        _animator = player.Animator;
+        _body = player.Body;
+        _dashForce = player.DashForce;
+        _dashCooldown = player.DashCooldown;
+        _staminaPerDash = player.DashStamina;
+        _stateMachine = player.StateMachine;
     }
 
     public void Enter()

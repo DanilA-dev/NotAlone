@@ -4,11 +4,8 @@ public class PlayerSprint : BasePlayerMove
 {
     public override MovementType.SpeedType MoveType => MovementType.SpeedType.Sprint;
 
-    public PlayerSprint(PlayerController playerController, Rigidbody body, Animator playerAnimator,
-         StateMachine stateMachine)
-       : base(playerController, body, playerAnimator, stateMachine)
-    {
-    }
+    public PlayerSprint(PlayerController playerController, PlayerStatesFabric fabric) : base(playerController, fabric) { }
+
 
     public override void Enter()
     {
@@ -21,8 +18,8 @@ public class PlayerSprint : BasePlayerMove
         base.ExecuteFixedUpdate();
         if (_playerController.Stamina.CurrentValue <= 0)
         {
-            if (_stateMachine.PreviousState == _playerController.DashState)
-                _stateMachine?.ChangeState(_playerController.RunState);
+            if (_stateMachine.PreviousState == _statesFabric.Dash())
+                _stateMachine?.ChangeState(_statesFabric.Run());
             else
                 _stateMachine?.ChangeState(_stateMachine.PreviousState);
         }

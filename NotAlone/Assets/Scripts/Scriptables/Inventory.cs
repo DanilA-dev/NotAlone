@@ -31,8 +31,6 @@ public class Inventory : ScriptableObject
         List<InventoryItem> returnList = new List<InventoryItem>();
         if (_inventoryItems.Count > 0)
             returnList = _inventoryItems.Where(i => i.state == InventoryItemState.Equiped).ToList();
-        else
-            throw new ArgumentException("Inventory is empty");
 
         return returnList;
     }

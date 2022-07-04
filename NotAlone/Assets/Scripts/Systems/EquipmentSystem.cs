@@ -32,6 +32,10 @@ public class EquipmentSystem : MonoBehaviour
     private void LoadInventory()
     {
         //load from save
+
+        if (_inventory.GetEquipedItems() == null)
+            return;
+
         for (int i = 0; i < _inventory.GetEquipedItems().Count; i++)
             FindInBackAndEquip(_inventory.GetEquipedItems()[i], 500);
 

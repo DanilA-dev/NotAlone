@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -21,12 +20,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private List<MovementType> _playerMovements = new List<MovementType>();
 
     private StateMachine _stateMachine;
-    private IState _idle;
-    private IState _walk;
-    private IState _run;
-    private IState _sprint;
-    private IState _dash;
-    private IState _objectInteraction;
+    private PlayerStatesFabric _statesFabic;
+    private PlayerDash _dash;
 
     private IInteractable _lastInteractableObject;
     private MovementType _currentMovement;
@@ -37,19 +32,19 @@ public class PlayerController : MonoBehaviour
     private Vector3 _dirToMouse;
 
     #region Properties
-
-    public IState IdleState => _idle;
-    public IState WalkState => _walk;
-    public IState RunState => _run;
-    public IState SprintState => _sprint;
-    public IState DashState => _dash;
-    public IState ObjectInteraction => _objectInteraction; 
+  
     public Vector3 MoveDir => _moveDir;
     public PlayerInput Input => _input;
+    public StateMachine StateMachine => _stateMachine;
+    public Rigidbody Body => _body;
+    public Animator Animator => _playerAnimator;
     public List<MovementType> PlayerMovements => _playerMovements;
     public MovementType CurrentMoveType => _currentMovement;
     public GameObject Interactor => this.gameObject;
     public StaminaSystem Stamina => _stamina;
+    public float DashForce => _dashForce;
+    public float DashCooldown => _dashCooldown;
+    public float DashStamina => _staminaPerDash;
 
 
     #endregion
@@ -83,8 +78,6 @@ public class PlayerController : MonoBehaviour
         _input.Player.Interact.performed += HandleObjectInteraction;
     }
 
-   
-
     private void Update()
     {
         RotateTowardsMouse();
@@ -100,15 +93,11 @@ public class PlayerController : MonoBehaviour
 
     private void EnableStateMachine()
     {
+        _statesFabic = new PlayerStatesFabric(this);
         _stateMachine = new StateMachine();
+        _dash = _statesFabic.Dash();
         _stateMachine.OnStateChange += () => _playerUI.ChangeStateDebug(_stateMachine.CurrentState.ToString());
-        _idle = new PlayerIdle(this, _stateMachine, _playerAnimator, _body);
-        _walk = new PlayerWalk(this, _body, _playerAnimator,_stateMachine);
-        _run = new PlayerRun(this, _body, _playerAnimator, _stateMachine);
-        _sprint = new PlayerSprint(this, _body, _playerAnimator, _stateMachine);
-        _dash = new PlayerDash(this, _playerAnimator, _body, _dashForce, _dashCooldown, _staminaPerDash, _stateMachine);
-        _objectInteraction = new PlayerObjectInteraction(this, _body, _playerAnimator);
-        _stateMachine.SetStartState(_idle);
+        _stateMachine.SetStartState(_statesFabic.Idle());
     }
 
     public void ChangeCurrentSpeedType(MovementType type)
@@ -141,47 +130,40 @@ public class PlayerController : MonoBehaviour
 
     private void HandleRun(InputAction.CallbackContext obj)
     {
-        if (_stateMachine.CurrentState != RunState)
-            _stateMachine.ChangeState(RunState);
+        if (_stateMachine.CurrentState != _statesFabic.Run())
+            _stateMachine.ChangeState(_statesFabic.Run());
         else
-            _stateMachine.ChangeState(WalkState);
+            _stateMachine.ChangeState(_statesFabic.Walk());
     }
 
 
     private void HandleSprint(InputAction.CallbackContext obj)
     {
-        if (_stateMachine.CurrentState != SprintState && _stamina.CurrentValue > 0)
-            _stateMachine.ChangeState(SprintState);
+        if (_stateMachine.CurrentState != _statesFabic.Sprint() && _stamina.CurrentValue > 0)
+            _stateMachine.ChangeState(_statesFabic.Sprint());
     }
 
     private void DisableSprint()
     {
-        if (_stateMachine.CurrentState == SprintState)
+        if (_stateMachine.CurrentState == _statesFabic.Sprint())
             _stateMachine.ChangeState(_stateMachine.PreviousState);
     }
 
     private void HandleDash(InputAction.CallbackContext obj)
     {
-        var dashState = _dash as PlayerDash;
-        if (dashState.CanDash())
-            _stateMachine.ChangeState(DashState);
+        if (_dash.CanDash())
+            _stateMachine.ChangeState(_dash);
     }
     private void HandleObjectInteraction(InputAction.CallbackContext obj)
     {
-        if(_stateMachine.CurrentState != ObjectInteraction)
-        {
-            _lastInteractableObject?.Interact(ObjectInteraction as PlayerObjectInteraction);
-            _stateMachine.ChangeState(ObjectInteraction);
-        }    
+        _lastInteractableObject?.Interact(_statesFabic.ObjectInteract());
+        _stateMachine.ChangeState(_statesFabic.ObjectInteract());
     }
 
     public void DisableInteractionState()
     {
-        if (_stateMachine.CurrentState == ObjectInteraction)
-            _stateMachine.ChangeState(_stateMachine.PreviousState);
+        _stateMachine.ChangeState(_statesFabic.Idle());
     }
-
-
 
     #endregion
     private void GetMoveVector(InputAction.CallbackContext value)

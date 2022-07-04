@@ -12,11 +12,11 @@ public class PlayerObjectInteraction : IState, IInteractor
 
     public Transform Interactor => _playerController.transform;
 
-    public PlayerObjectInteraction(PlayerController playerController, Rigidbody body, Animator playerAnimator)
+    public PlayerObjectInteraction(PlayerController player)
     {
-        _playerController = playerController;
-        _body = body;
-        _playerAnimator = playerAnimator;
+        _playerController = player;
+        _body = player.Body;
+        _playerAnimator = player.Animator;
     }
 
     public void Enter()

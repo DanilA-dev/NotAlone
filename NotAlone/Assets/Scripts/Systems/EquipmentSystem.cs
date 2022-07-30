@@ -38,7 +38,6 @@ public class EquipmentSystem : MonoBehaviour
 
         for (int i = 0; i < _inventory.GetEquipedItems().Count; i++)
             FindInBackAndEquip(_inventory.GetEquipedItems()[i], 500);
-
     }
 
     public void AddItemToInventory(InventoryItem newItem)

@@ -349,18 +349,6 @@ Mesh:
     offset: 0
     size: 0
     path: 
---- !u!114 &373491526 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9139868844135348785, guid: 653eb10edf1c24943bf5a64d5c287eb0,
-    type: 3}
-  m_PrefabInstance: {fileID: 4754732741345186065}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -2290,25 +2278,6 @@ Mesh:
     offset: 0
     size: 0
     path: 
---- !u!1 &2145076058 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6214247451616839842, guid: 653eb10edf1c24943bf5a64d5c287eb0,
-    type: 3}
-  m_PrefabInstance: {fileID: 4754732741345186065}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2145076061
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2145076058}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b79d229f13ab194da04a54af2135e01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _noteText: {fileID: 373491526}
 --- !u!1001 &2367043275827476330
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2425,11 +2394,6 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 1938303862}
-    - target: {fileID: 2038358317, guid: 653eb10edf1c24943bf5a64d5c287eb0, type: 3}
-      propertyPath: _inventory
-      value: 
-      objectReference: {fileID: 11400000, guid: b1f9e6ab2833c024e9203935a1a3fcad,
-        type: 2}
     - target: {fileID: 4754732741492474092, guid: 653eb10edf1c24943bf5a64d5c287eb0,
         type: 3}
       propertyPath: m_RootOrder
@@ -2490,11 +2454,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerPrefab
       objectReference: {fileID: 0}
-    - target: {fileID: 4754732742952515833, guid: 653eb10edf1c24943bf5a64d5c287eb0,
-        type: 3}
-      propertyPath: _notePanel
-      value: 
-      objectReference: {fileID: 2145076061}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 653eb10edf1c24943bf5a64d5c287eb0, type: 3}
 --- !u!4 &7694393055073503091 stripped

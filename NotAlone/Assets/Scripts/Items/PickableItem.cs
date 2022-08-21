@@ -42,7 +42,7 @@ public class PickableItem : MonoBehaviour, IInteractable
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out PlayerController interactor))
+        if (other.TryGetComponent(out PlayerMovement interactor))
         {
             _pickUpText.gameObject.SetActive(true);
             _pickUpText.DOFade(1, 1).From(0);
@@ -51,13 +51,13 @@ public class PickableItem : MonoBehaviour, IInteractable
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.TryGetComponent(out PlayerController interactor))
+        if (other.TryGetComponent(out PlayerMovement interactor))
             _pickUpText.gameObject.SetActive(true);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if(other.TryGetComponent(out PlayerController interactor))
+        if(other.TryGetComponent(out PlayerMovement interactor))
             _pickUpText.DOFade(0, 1).OnComplete(() => _pickUpText.gameObject.SetActive(false));
     }
 }

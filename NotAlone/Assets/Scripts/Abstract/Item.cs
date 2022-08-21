@@ -9,7 +9,7 @@ public abstract class Item : MonoBehaviour
     public InventoryItem InventoryItem => _inventoryItem;
     public int ID => _inventoryItem.id;
 
-    public virtual void Equip(PlayerController player) { }
+    public virtual void Equip(PlayerMovement player) { }
     public virtual void UnEquip() { }
 
 }

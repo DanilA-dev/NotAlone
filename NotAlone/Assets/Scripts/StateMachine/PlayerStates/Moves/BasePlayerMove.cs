@@ -1,3 +1,4 @@
+using Player.States;
 using System.Linq;
 using UnityEngine;
 
@@ -7,18 +8,18 @@ public class BasePlayerMove : IState
     protected StateMachine _stateMachine;
     protected Rigidbody _body;
     protected MovementType _moveType;
-    protected PlayerController _playerController;
+    protected PlayerMovement _playerController;
     protected PlayerStatesFabric _statesFabric;
     public virtual MovementType.SpeedType MoveType { get; }
 
-    public BasePlayerMove(PlayerController player, PlayerStatesFabric statesFabric)
+    public BasePlayerMove(PlayerMovement player, PlayerStatesFabric statesFabric, PlayerStateController stateController)
     {
         _statesFabric = statesFabric;
         _playerController = player;
         _body = player.Body;
         _playerAnimator = player.Animator;
         _moveType = _playerController.PlayerMovements.Where(m => m.Type == MoveType).FirstOrDefault();
-        _stateMachine = player.StateMachine;
+        _stateMachine = stateController.StateMachine;
     }
 
     public virtual void Enter()

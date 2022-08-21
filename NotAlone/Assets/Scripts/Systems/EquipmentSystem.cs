@@ -1,21 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 public class EquipmentSystem : MonoBehaviour
 {
     [SerializeField] private Inventory _inventory;
 
     private List<Item> _equipableItems = new List<Item>();
-    private PlayerController _player;
+    private PlayerMovement _player;
 
     public static event Action<InventoryItem> OnItemCollect;
 
     private void Awake()
     {
-        _player = GetComponentInParent<PlayerController>();
+        _player = GetComponentInParent<PlayerMovement>();
         GetEquipableItems();
         LoadInventory();
     }
@@ -37,7 +37,7 @@ public class EquipmentSystem : MonoBehaviour
             return;
 
         for (int i = 0; i < _inventory.GetEquipedItems().Count; i++)
-            FindInBackAndEquip(_inventory.GetEquipedItems()[i], 500);
+            FindInBackAndEquip(_inventory.GetEquipedItems()[i], 0.5f);
     }
 
     public void AddItemToInventory(InventoryItem newItem)
@@ -46,16 +46,16 @@ public class EquipmentSystem : MonoBehaviour
         _inventory.AddItem(newItem);
         var tryToEquip = newItem.type == InventoryItemType.Equipable;
         if (tryToEquip)
-            FindInBackAndEquip(newItem,2000);
+            FindInBackAndEquip(newItem,2);
     }
 
    
-    private async void FindInBackAndEquip(InventoryItem newItem, int milisec)
+    private async void FindInBackAndEquip(InventoryItem newItem, float time)
     {
         var sameItemInBack = _equipableItems.Where(i => i.ID == newItem.id).FirstOrDefault();
         if (sameItemInBack)
         {
-            await Task.Delay(milisec);
+            await UniTask.Delay(TimeSpan.FromSeconds(time));
             newItem.state = InventoryItemState.Equiped;
             sameItemInBack.Equip(_player);
         }

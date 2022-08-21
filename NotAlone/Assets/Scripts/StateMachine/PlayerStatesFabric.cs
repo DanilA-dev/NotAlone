@@ -1,40 +1,50 @@
+using Player.States;
 
 public class PlayerStatesFabric
 {
-    private PlayerController _player;
+    private PlayerMovement _player;
+    private PlayerStateController _stateController;
 
-    public PlayerStatesFabric(PlayerController player)
+    private PlayerIdle _idle;
+    private PlayerWalk _walk;
+    private PlayerSprint _sprint;
+    private PlayerRun _run;
+    private PlayerObjectInteraction _interaction;
+    private PlayerDash _dash;
+
+    public PlayerStatesFabric(PlayerMovement player, PlayerStateController stateController)
     {
         _player = player;
+        _stateController = stateController;
     }
 
     public PlayerIdle Idle()
     {
-        return new PlayerIdle(_player, this);
+        return _idle = _idle ?? new PlayerIdle(_player, this, _stateController);
     }
 
     public PlayerWalk Walk()
     {
-        return new PlayerWalk(_player, this);
+        return _walk = _walk ?? new PlayerWalk(_player, this, _stateController);
     }
 
     public PlayerRun Run()
     {
-        return new PlayerRun(_player, this);
+        return _run = _run ?? new PlayerRun(_player, this, _stateController);
     }
 
     public PlayerSprint Sprint()
     {
-        return  new PlayerSprint(_player, this);
+        return _sprint = _sprint ?? new PlayerSprint(_player, this, _stateController);
     }
 
     public PlayerDash Dash()
     {
-        return new PlayerDash(_player);
+        return _dash = _dash ?? new PlayerDash(_player, _stateController);
     }
 
     public PlayerObjectInteraction ObjectInteract()
     {
-        return new PlayerObjectInteraction(_player);
+        return _interaction = _interaction ?? new PlayerObjectInteraction(_player);
     }
 }

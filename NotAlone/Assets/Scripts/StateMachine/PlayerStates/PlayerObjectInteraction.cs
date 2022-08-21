@@ -6,13 +6,13 @@ public class PlayerObjectInteraction : IState, IInteractor
 {
     private const float ROTATION_SPEED = 700;
 
-    private PlayerController _playerController;
+    private PlayerMovement _playerController;
     private Rigidbody _body;
     private Animator _playerAnimator;
 
     public Transform Interactor => _playerController.transform;
 
-    public PlayerObjectInteraction(PlayerController player)
+    public PlayerObjectInteraction(PlayerMovement player)
     {
         _playerController = player;
         _body = player.Body;
@@ -21,7 +21,7 @@ public class PlayerObjectInteraction : IState, IInteractor
 
     public void Enter()
     {
-        _playerController.ToogleInput(false);
+       // _playerController.ToogleInput(false);
     }
 
     public void ExecuteFixedUpdate() { }
@@ -29,7 +29,7 @@ public class PlayerObjectInteraction : IState, IInteractor
 
     public void Exit()
     {
-        _playerController.ToogleInput(true);
+      //  _playerController.ToogleInput(true);
     }
 
     public async void FocusToInteractable(Transform objectToFocus, Action onInteractionEnd)

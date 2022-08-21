@@ -91,9 +91,18 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""FlashLightCharge"",
-                    ""type"": ""PassThrough"",
-                    ""id"": ""ad5a4ab4-7011-4018-87c4-ec524055ed7a"",
+                    ""name"": ""Fire0"",
+                    ""type"": ""Button"",
+                    ""id"": ""b5cf71d4-ca6e-4d39-ad13-c3f29daed04c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Fire1"",
+                    ""type"": ""Button"",
+                    ""id"": ""4a63a247-ed23-4e90-898c-3926df5ce018"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -345,23 +354,23 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""9325e342-dfe2-4652-a9df-95e1c74cdc43"",
-                    ""path"": ""<Mouse>/rightButton"",
-                    ""interactions"": ""Hold(pressPoint=0.3)"",
+                    ""id"": ""10d29dee-c719-4c42-816c-6c4a203c9d40"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""FlashLightCharge"",
+                    ""action"": ""Fire0"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""9a32af86-7aa1-4266-8b51-83a208feaa0f"",
-                    ""path"": ""<Gamepad>/rightTrigger"",
-                    ""interactions"": ""Hold(pressPoint=0.3)"",
+                    ""id"": ""e9291201-4b57-4103-bd80-9aa8ad6280b2"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""FlashLightCharge"",
+                    ""action"": ""Fire1"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -379,7 +388,8 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         m_Player_LookDelta = m_Player.FindAction("LookDelta", throwIfNotFound: true);
         m_Player_Dash = m_Player.FindAction("Dash", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
-        m_Player_FlashLightCharge = m_Player.FindAction("FlashLightCharge", throwIfNotFound: true);
+        m_Player_Fire0 = m_Player.FindAction("Fire0", throwIfNotFound: true);
+        m_Player_Fire1 = m_Player.FindAction("Fire1", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -446,7 +456,8 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_LookDelta;
     private readonly InputAction m_Player_Dash;
     private readonly InputAction m_Player_Interact;
-    private readonly InputAction m_Player_FlashLightCharge;
+    private readonly InputAction m_Player_Fire0;
+    private readonly InputAction m_Player_Fire1;
     public struct PlayerActions
     {
         private @PlayerInput m_Wrapper;
@@ -458,7 +469,8 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         public InputAction @LookDelta => m_Wrapper.m_Player_LookDelta;
         public InputAction @Dash => m_Wrapper.m_Player_Dash;
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
-        public InputAction @FlashLightCharge => m_Wrapper.m_Player_FlashLightCharge;
+        public InputAction @Fire0 => m_Wrapper.m_Player_Fire0;
+        public InputAction @Fire1 => m_Wrapper.m_Player_Fire1;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -489,9 +501,12 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 @Interact.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteract;
                 @Interact.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteract;
                 @Interact.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteract;
-                @FlashLightCharge.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFlashLightCharge;
-                @FlashLightCharge.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFlashLightCharge;
-                @FlashLightCharge.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFlashLightCharge;
+                @Fire0.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire0;
+                @Fire0.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire0;
+                @Fire0.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire0;
+                @Fire1.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire1;
+                @Fire1.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire1;
+                @Fire1.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire1;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -517,9 +532,12 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 @Interact.started += instance.OnInteract;
                 @Interact.performed += instance.OnInteract;
                 @Interact.canceled += instance.OnInteract;
-                @FlashLightCharge.started += instance.OnFlashLightCharge;
-                @FlashLightCharge.performed += instance.OnFlashLightCharge;
-                @FlashLightCharge.canceled += instance.OnFlashLightCharge;
+                @Fire0.started += instance.OnFire0;
+                @Fire0.performed += instance.OnFire0;
+                @Fire0.canceled += instance.OnFire0;
+                @Fire1.started += instance.OnFire1;
+                @Fire1.performed += instance.OnFire1;
+                @Fire1.canceled += instance.OnFire1;
             }
         }
     }
@@ -533,6 +551,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         void OnLookDelta(InputAction.CallbackContext context);
         void OnDash(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
-        void OnFlashLightCharge(InputAction.CallbackContext context);
+        void OnFire0(InputAction.CallbackContext context);
+        void OnFire1(InputAction.CallbackContext context);
     }
 }

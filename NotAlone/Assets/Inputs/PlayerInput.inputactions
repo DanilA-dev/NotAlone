@@ -69,9 +69,18 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "FlashLightCharge",
-                    "type": "PassThrough",
-                    "id": "ad5a4ab4-7011-4018-87c4-ec524055ed7a",
+                    "name": "Fire0",
+                    "type": "Button",
+                    "id": "b5cf71d4-ca6e-4d39-ad13-c3f29daed04c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Fire1",
+                    "type": "Button",
+                    "id": "4a63a247-ed23-4e90-898c-3926df5ce018",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -323,23 +332,23 @@
                 },
                 {
                     "name": "",
-                    "id": "9325e342-dfe2-4652-a9df-95e1c74cdc43",
-                    "path": "<Mouse>/rightButton",
-                    "interactions": "Hold(pressPoint=0.3)",
+                    "id": "10d29dee-c719-4c42-816c-6c4a203c9d40",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "FlashLightCharge",
+                    "action": "Fire0",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "9a32af86-7aa1-4266-8b51-83a208feaa0f",
-                    "path": "<Gamepad>/rightTrigger",
-                    "interactions": "Hold(pressPoint=0.3)",
+                    "id": "e9291201-4b57-4103-bd80-9aa8ad6280b2",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "FlashLightCharge",
+                    "action": "Fire1",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

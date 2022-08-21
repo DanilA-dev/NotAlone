@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public class StateMachine 
 {
@@ -36,23 +35,13 @@ public class StateMachine
 
     public void Tick()
     {
-        UpdateTickCurrentState();
+        if (_canExecuteState)
+            _currentState.ExecuteUpdate();
     }
 
     public void FixedTick()
     {
-        FixedUpdateTickCurrentState();
-    }
-
-    private void UpdateTickCurrentState()
-    {
-         if (_canExecuteState)
-            _currentState.ExecuteUpdate();
-    }
-
-    private void FixedUpdateTickCurrentState()
-    {
-       if (_canExecuteState)
+        if (_canExecuteState)
             _currentState.ExecuteFixedUpdate();
     }
 }

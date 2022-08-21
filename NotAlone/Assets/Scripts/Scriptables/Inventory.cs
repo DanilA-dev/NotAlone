@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using System.Linq;
-using System;
 
 [CreateAssetMenu(menuName ="Data/Inventory")]
 public class Inventory : ScriptableObject

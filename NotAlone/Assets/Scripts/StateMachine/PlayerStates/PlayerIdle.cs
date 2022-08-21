@@ -1,21 +1,22 @@
+using Player.States;
 using System.Threading.Tasks;
 using UnityEngine;
 
 public class PlayerIdle : IState
 {
-    private PlayerController _playerController;
+    private PlayerMovement _playerController;
     private Rigidbody _body;
     private Animator _animator;
     private StateMachine _stateMachine;
     private PlayerStatesFabric _statesFarbic;
 
-    public PlayerIdle(PlayerController player, PlayerStatesFabric statesFarbic)
+    public PlayerIdle(PlayerMovement player, PlayerStatesFabric statesFarbic, PlayerStateController stateController)
     {
         _playerController = player;
         _body = player.Body;
         _animator = player.Animator;
         _statesFarbic = statesFarbic;
-        _stateMachine = player.StateMachine;
+        _stateMachine = stateController.StateMachine;
     }
 
     public void Enter() { }

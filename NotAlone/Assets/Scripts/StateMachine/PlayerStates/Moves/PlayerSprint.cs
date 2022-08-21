@@ -1,10 +1,16 @@
+using Player.States;
 using UnityEngine;
 
 public class PlayerSprint : BasePlayerMove
 {
+    public PlayerSprint(PlayerMovement player, PlayerStatesFabric statesFabric,
+        PlayerStateController stateController) : base(player, statesFabric, stateController)
+    {
+    }
+
     public override MovementType.SpeedType MoveType => MovementType.SpeedType.Sprint;
 
-    public PlayerSprint(PlayerController playerController, PlayerStatesFabric fabric) : base(playerController, fabric) { }
+   
 
 
     public override void Enter()

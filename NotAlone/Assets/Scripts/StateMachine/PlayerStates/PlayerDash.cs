@@ -1,9 +1,10 @@
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using Player.States;
 using UnityEngine;
 
 public class PlayerDash : IState
 {
-    private PlayerController _playerController;
+    private PlayerMovement _playerController;
     private StateMachine _stateMachine;
     private Animator _animator;
     private Rigidbody _body;
@@ -14,7 +15,7 @@ public class PlayerDash : IState
 
     private bool _isDashing;
 
-    public PlayerDash(PlayerController player)
+    public PlayerDash(PlayerMovement player, PlayerStateController stateController)
     {
         _playerController = player;
         _animator = player.Animator;
@@ -22,7 +23,7 @@ public class PlayerDash : IState
         _dashForce = player.DashForce;
         _dashCooldown = player.DashCooldown;
         _staminaPerDash = player.DashStamina;
-        _stateMachine = player.StateMachine;
+        _stateMachine = stateController.StateMachine;
     }
 
     public void Enter()
@@ -49,13 +50,13 @@ public class PlayerDash : IState
     {
         float speed = _animator.speed;
         _animator.speed = 0;
-        await Task.Yield();
+        await UniTask.Yield();
         _animator.speed = speed;
         _isDashing = true;
         _body.AddRelativeForce(dir.normalized * _dashForce, ForceMode.Impulse);
         _playerController.Stamina.CurrentValue -= _staminaPerDash;
         _stateMachine.ChangeState(_stateMachine.PreviousState);
-        await Task.Delay((int)dashCooldown * 1000);
+        await UniTask.Delay((int)dashCooldown * 1000);
         _isDashing = false;
     }
 

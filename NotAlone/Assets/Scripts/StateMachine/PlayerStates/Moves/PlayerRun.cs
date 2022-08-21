@@ -1,9 +1,15 @@
+using Player.States;
 using UnityEngine;
 
 public class PlayerRun : BasePlayerMove
 {
+    public PlayerRun(PlayerMovement player, PlayerStatesFabric statesFabric,
+        PlayerStateController stateController) : base(player, statesFabric, stateController)
+    {
+    }
+
     public override MovementType.SpeedType MoveType => MovementType.SpeedType.Run;
-    public PlayerRun(PlayerController playerController, PlayerStatesFabric fabric) : base(playerController, fabric) { }
+    
 
     public override void Enter()
     {

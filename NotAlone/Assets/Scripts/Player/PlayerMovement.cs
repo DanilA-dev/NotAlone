@@ -1,14 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Systems")]
-    [SerializeField] private HealthSystem _health;
-    [SerializeField] private StaminaSystem _stamina;
-    [SerializeField] private PlayerUI _playerUI;
-    [Space]
     [SerializeField] private Animator _playerAnimator;
     [SerializeField] private Rigidbody _body;
     [Space]
@@ -20,7 +14,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private List<MovementType> _playerMovements = new List<MovementType>();
 
 
-    private IInteractable _lastInteractableObject;
+    private StaminaSystem _stamina;
     private MovementType _currentMovement;
     private Camera _cam;
 
@@ -33,9 +27,9 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody Body => _body;
     public Animator Animator => _playerAnimator;
     public List<MovementType> PlayerMovements => _playerMovements;
+    public StaminaSystem Stamina => _stamina;
     public MovementType CurrentMoveType => _currentMovement;
     public GameObject Interactor => this.gameObject;
-    public StaminaSystem Stamina => _stamina;
     public float DashForce => _dashForce;
     public float DashCooldown => _dashCooldown;
     public float DashStamina => _staminaPerDash;
@@ -48,11 +42,24 @@ public class PlayerMovement : MonoBehaviour
         _cam = Camera.main;
     }
 
-    private void OnEnable()
+    private void Update()
     {
-        _playerUI.InitPlayerValues(_health, Stamina);
+        if(_moveDir != Vector3.zero)
+        {
+            Quaternion r = Quaternion.LookRotation(-_moveDir, Vector3.up);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, r, _rotationSpeed * Time.deltaTime);
+        }
     }
-   
+
+    public void Init(StaminaSystem stamina)
+    {
+        _stamina = stamina;
+    }
+
+    public void UpdateMoveVector(Vector2 vector)
+    {
+        _moveDir = new Vector3(vector.x, 0, vector.y);
+    }
 
     public void ChangeCurrentSpeedType(MovementType type)
     {
@@ -77,18 +84,7 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.TryGetComponent(out IInteractable i))
-            _lastInteractableObject = i;
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.TryGetComponent(out IInteractable i))
-            _lastInteractableObject = null;
-    }
+   
 
 }
 

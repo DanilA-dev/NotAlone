@@ -8,23 +8,23 @@ public class BasePlayerMove : IState
     protected StateMachine _stateMachine;
     protected Rigidbody _body;
     protected MovementType _moveType;
-    protected PlayerMovement _playerController;
+    protected PlayerMovement _playerMovement;
     protected PlayerStatesFabric _statesFabric;
     public virtual MovementType.SpeedType MoveType { get; }
 
     public BasePlayerMove(PlayerMovement player, PlayerStatesFabric statesFabric, PlayerStateController stateController)
     {
         _statesFabric = statesFabric;
-        _playerController = player;
+        _playerMovement = player;
         _body = player.Body;
         _playerAnimator = player.Animator;
-        _moveType = _playerController.PlayerMovements.Where(m => m.Type == MoveType).FirstOrDefault();
+        _moveType = _playerMovement.PlayerMovements.Where(m => m.Type == MoveType).FirstOrDefault();
         _stateMachine = stateController.StateMachine;
     }
 
     public virtual void Enter()
     {
-        _playerController.ChangeCurrentSpeedType(_moveType);
+        _playerMovement.ChangeCurrentSpeedType(_moveType);
     }
 
     public virtual void ExecuteFixedUpdate()
@@ -33,9 +33,9 @@ public class BasePlayerMove : IState
         Friciton();
     }
 
-    public virtual   void ExecuteUpdate()
+    public virtual void ExecuteUpdate()
     {
-       if (_playerController.MoveDir == Vector3.zero)
+       if (_playerMovement.MoveDir == Vector3.zero)
             _stateMachine.ChangeState(_statesFabric.Idle());
     }
    
@@ -43,24 +43,21 @@ public class BasePlayerMove : IState
    
     private void Move()
     {
-        Vector3 target = _body.transform.InverseTransformDirection(_body.velocity);
-        float velocityZ = target.z;
-        float velocityX = target.x;
+        float velocityX = Mathf.Clamp01(_body.velocity.x);
 
-        _playerAnimator.SetFloat("InputY", velocityZ, 0.1f, Time.deltaTime);
-        _playerAnimator.SetFloat("InputX", velocityX, 0.1f, Time.deltaTime);
+        _playerAnimator.SetFloat("InputX", _body.velocity.z, 0.1f, Time.deltaTime);
 
-        _body.AddRelativeForce(_playerController.MoveDir.normalized * _moveType.Acceleration * Time.deltaTime);
+        _body.AddForce(-_playerMovement.MoveDir.normalized * _moveType.Acceleration * Time.deltaTime);
 
-        if (_playerController.MoveDir != Vector3.zero)
-            _playerController.CurrentMoveType.ReduceStamina(_playerController.Stamina);
+        if (_playerMovement.MoveDir != Vector3.zero)
+            _playerMovement.CurrentMoveType.ReduceStamina(_playerMovement.Stamina);
     }
 
     private void Friciton()
     {
         if (_body.velocity.magnitude > 0)
         {
-            var oppositeDir = -_body.velocity * _playerController.CurrentMoveType.Friction;
+            var oppositeDir = -_body.velocity * _playerMovement.CurrentMoveType.Friction;
             _body.AddForce(oppositeDir * Time.deltaTime);
         }
     }

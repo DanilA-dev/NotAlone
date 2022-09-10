@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Player.States
@@ -7,6 +8,7 @@ namespace Player.States
         private StateMachine _stateMachine;
         private StaminaSystem _stamina;
         private PlayerStatesFabric _states;
+        private IInteractable _lastInteractableObject;
 
         public StateMachine StateMachine => _stateMachine;
 
@@ -18,7 +20,6 @@ namespace Player.States
 
             _stateMachine.SetStartState(_states.Idle());
         }
-
 
         private void Update()
         {
@@ -58,16 +59,29 @@ namespace Player.States
 
         public void HandleInteraction()
         {
-            //to change state need to check(overlap sphere for example) interactables around player
-            //if nothing in zone return
-
-            //_lastInteractableObject?.Interact(_statesFabic.ObjectInteract());
-            //_stateMachine.ChangeState(_statesFabic.ObjectInteract());
+            if(_lastInteractableObject != null)
+            {
+                _lastInteractableObject?.Interact(_states.ObjectInteract());
+                _stateMachine.ChangeState(_states.ObjectInteract());
+            }
         }
 
         public void HandleInteractionCancel()
         {
             _stateMachine.ChangeState(_states.Idle());
+        }
+
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.TryGetComponent(out IInteractable i))
+                _lastInteractableObject = i;
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if (other.TryGetComponent(out IInteractable i))
+                _lastInteractableObject = null;
         }
 
     }

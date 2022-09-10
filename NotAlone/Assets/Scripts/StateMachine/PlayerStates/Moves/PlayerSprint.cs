@@ -22,7 +22,7 @@ public class PlayerSprint : BasePlayerMove
     public override void ExecuteFixedUpdate()
     {
         base.ExecuteFixedUpdate();
-        if (_playerController.Stamina.CurrentValue <= 0)
+        if (_playerMovement.Stamina.CurrentValue <= 0)
         {
             if (_stateMachine.PreviousState == _statesFabric.Dash())
                 _stateMachine?.ChangeState(_statesFabric.Run());

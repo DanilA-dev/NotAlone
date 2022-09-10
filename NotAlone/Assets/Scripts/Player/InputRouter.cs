@@ -23,6 +23,11 @@ namespace Input
         private Vector2 _moveDir;
         private Vector2 _mouseDelta;
 
+        private void Awake()
+        {
+            _input = new PlayerInput();
+        }
+
         private void OnEnable()
         {
             TurnInputOn();
@@ -42,6 +47,16 @@ namespace Input
         {
             UpdateMoveVector();
             UpdateMouseDelta();
+            UpdateMouseHold();
+        }
+
+        private void UpdateMouseHold()
+        {
+            if (_input.Player.Fire0.IsPressed())
+                Mouse0Hold?.Invoke();
+
+            if (_input.Player.Fire1.IsPressed())
+                Mouse1Hold?.Invoke();
         }
 
         private void UpdateMouseDelta()
